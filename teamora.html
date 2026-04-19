@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teamora - Management Simplified</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --primary:#0D9488;
+  --primary-light:#CCFBF1;
+  --primary-dark:#0F766E;
+  --primary-bg:#F0FDFA;
+  --white:#FFFFFF;
+  --gray-50:#F9FAFB;
+  --gray-100:#F3F4F6;
+  --gray-200:#E5E7EB;
+  --gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;
+  --gray-500:#6B7280;
+  --gray-600:#4B5563;
+  --gray-700:#374151;
+  --gray-800:#1F2937;
+  --gray-900:#111827;
+  --red:#EF4444;
+  --red-light:#FEE2E2;
+  --green:#10B981;
+  --green-light:#D1FAE5;
+  --yellow:#F59E0B;
+  --yellow-light:#FEF3C7;
+  --sidebar-w:208px;
+  --header-h:52px;
+  --font:'Inter',sans-serif;
+  --radius:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.1),0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-xl:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
+}
+body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);font-size:14px;line-height:1.5;}
+/* ===== UTILITY ===== */
+.hidden{display:none!important;}
+.flex{display:flex;}
+.flex-col{flex-direction:column;}
+.items-center{align-items:center;}
+.justify-between{justify-content:space-between;}
+.justify-center{justify-content:center;}
+.gap-1{gap:4px;}
+.gap-2{gap:8px;}
+.gap-3{gap:12px;}
+.gap-4{gap:16px;}
+.gap-6{gap:24px;}
+.w-full{width:100%;}
+.text-sm{font-size:13px;}
+.text-xs{font-size:11px;}
+.font-medium{font-weight:500;}
+.font-semibold{font-weight:600;}
+.font-bold{font-weight:700;}
+.text-gray{color:var(--gray-500);}
+.text-primary{color:var(--primary);}
+.text-red{color:var(--red);}
+.text-green{color:var(--green);}
+.truncate{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.relative{position:relative;}
+.cursor-pointer{cursor:pointer;}
+
+/* ===== BUTTONS ===== */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;font-family:var(--font);}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-secondary{background:var(--white);color:var(--gray-700);border:1px solid var(--gray-200);}
+.btn-secondary:hover{background:var(--gray-50);}
+.btn-ghost{background:transparent;color:var(--gray-600);border:1px solid var(--gray-200);}
+.btn-ghost:hover{background:var(--gray-100);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-danger:hover{background:#DC2626;}
+.btn-sm{padding:6px 12px;font-size:13px;}
+.btn-icon{padding:7px;border-radius:6px;background:transparent;border:1px solid var(--gray-200);color:var(--gray-500);cursor:pointer;display:inline-flex;align-items:center;transition:all 0.15s;}
+.btn-icon:hover{background:var(--gray-100);}
+
+/* ===== FORM ===== */
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:13px;font-weight:500;color:var(--gray-700);}
+.form-control{width:100%;padding:9px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;font-family:var(--font);color:var(--gray-900);background:var(--white);outline:none;transition:border 0.15s;}
+.form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,0.1);}
+.form-control.error{border-color:var(--red);}
+.form-control-icon{position:relative;}
+.form-control-icon .form-control{padding-left:38px;}
+.form-control-icon .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);}
+.input-with-icon{position:relative;}
+.input-with-icon input{padding-left:38px;}
+.input-with-icon .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);}
+select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+textarea.form-control{resize:vertical;min-height:80px;}
+.error-msg{font-size:12px;color:var(--red);display:flex;align-items:center;gap:4px;}
+
+/* ===== BADGE / TAGS ===== */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;}
+.badge-active{background:var(--primary-light);color:var(--primary-dark);}
+.badge-available{background:var(--primary-light);color:var(--primary-dark);}
+.badge-paused{background:var(--gray-200);color:var(--gray-600);}
+.badge-on-shift{background:var(--gray-800);color:#fff;}
+.badge-unavailable{background:var(--gray-100);color:var(--gray-600);}
+.badge-paid{background:var(--green-light);color:#065F46;}
+.badge-pending{background:var(--yellow-light);color:#92400E;}
+.badge-overdue{background:var(--red-light);color:#991B1B;}
+.badge-approved{background:var(--gray-800);color:#fff;}
+.badge-rejected{background:var(--gray-900);color:#fff;}
+.badge-connected{background:var(--gray-100);color:var(--gray-700);}
+.badge-scheduled{background:var(--gray-100);color:var(--gray-600);}
+.badge-ready{background:var(--gray-100);color:var(--gray-600);}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--gray-100);border-radius:6px;font-size:12px;color:var(--gray-600);border:1px solid var(--gray-200);}
+
+/* ===== LAYOUT ===== */
+.app-layout{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:var(--sidebar-w);background:var(--white);border-right:1px solid var(--gray-200);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-logo{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--gray-200);}
+.logo-icon{width:32px;height:32px;}
+.logo-text{font-size:16px;font-weight:700;color:var(--gray-900);letter-spacing:-0.3px;}
+.nav-menu{flex:1;padding:8px 0;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:var(--gray-600);font-size:13.5px;font-weight:400;transition:all 0.15s;border-left:3px solid transparent;margin:1px 0;}
+.nav-item:hover{background:var(--gray-50);color:var(--gray-900);}
+.nav-item.active{background:var(--primary-bg);color:var(--primary);border-left-color:var(--primary);font-weight:500;}
+.nav-item svg{flex-shrink:0;width:16px;height:16px;}
+.sidebar-user{padding:12px 16px;border-top:1px solid var(--gray-200);display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--gray-700);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+.user-info{flex:1;min-width:0;}
+.user-name{font-size:13px;font-weight:600;color:var(--gray-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-role{font-size:11px;color:var(--gray-500);}
+.user-menu{position:absolute;bottom:60px;left:12px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow-lg);z-index:100;min-width:180px;padding:4px;}
+.user-menu-item{padding:8px 12px;cursor:pointer;font-size:13px;color:var(--gray-700);border-radius:6px;display:flex;align-items:center;gap:8px;}
+.user-menu-item:hover{background:var(--gray-50);}
+.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:var(--header-h);border-bottom:1px solid var(--gray-200);background:var(--white);flex-shrink:0;}
+.topbar-title{font-size:15px;font-weight:500;color:var(--gray-900);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.notif-btn{position:relative;padding:6px;cursor:pointer;color:var(--gray-500);}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:#EF4444;border-radius:50%;border:2px solid #fff;}
+.org-switcher{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-700);}
+.org-switcher:hover{background:var(--gray-100);}
+.page-content{flex:1;overflow-y:auto;padding:24px;}
+
+/* ===== PAGE HEADER ===== */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
+.page-header-left h1{font-size:22px;font-weight:700;color:var(--gray-900);}
+.page-header-left p{font-size:13px;color:var(--gray-500);margin-top:2px;}
+
+/* ===== CARDS ===== */
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);padding:20px;}
+.stat-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);padding:20px 24px;}
+.stat-label{font-size:12px;color:var(--gray-500);margin-bottom:6px;}
+.stat-value{font-size:22px;font-weight:700;color:var(--gray-900);}
+.stat-change{font-size:12px;font-weight:500;}
+.stat-change.up{color:#10B981;}
+.stat-change.down{color:#EF4444;}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+
+/* ===== TABLE ===== */
+.table-wrap{background:var(--white);border-radius:var(--radius);border:1px solid var(--gray-200);overflow:hidden;}
+.table-search-bar{padding:12px 16px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:12px;}
+.search-input{flex:1;position:relative;}
+.search-input input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:13.5px;font-family:var(--font);outline:none;color:var(--gray-900);}
+.search-input input:focus{border-color:var(--primary);}
+.search-input .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);}
+.filter-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:13px;color:var(--gray-600);cursor:pointer;background:var(--white);}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--gray-200);}
+th{padding:10px 16px;text-align:left;font-size:12px;font-weight:600;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.5px;}
+td{padding:13px 16px;border-bottom:1px solid var(--gray-100);font-size:13.5px;color:var(--gray-900);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--gray-50);}
+.td-gray{color:var(--gray-400);}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(2px);}
+.modal{background:var(--white);border-radius:12px;width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:modalIn 0.2s ease;}
+.modal-lg{width:660px;}
+.modal-sm{width:400px;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95) translateY(-10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px 16px;}
+.modal-header-left h2{font-size:17px;font-weight:600;color:var(--gray-900);}
+.modal-header-left p{font-size:13px;color:var(--gray-500);margin-top:3px;}
+.modal-close{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray-400);border:none;background:transparent;}
+.modal-close:hover{background:var(--gray-100);color:var(--gray-700);}
+.modal-body{padding:0 24px 20px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:10px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field-group{margin-bottom:14px;}
+
+/* ===== AUTH PAGES ===== */
+.auth-page{min-height:100vh;background:var(--gray-100);display:flex;align-items:center;justify-content:center;}
+.auth-card{background:var(--white);border-radius:16px;padding:36px 32px;width:400px;box-shadow:0 4px 24px rgba(0,0,0,0.08);text-align:center;}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;}
+.auth-logo img{width:44px;}
+.auth-logo-text{font-size:20px;font-weight:700;color:var(--gray-900);}
+.auth-title{font-size:22px;font-weight:700;color:var(--gray-900);margin-bottom:6px;}
+.auth-subtitle{font-size:13.5px;color:var(--gray-500);margin-bottom:24px;}
+.social-btn{width:100%;padding:10px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;font-weight:500;color:var(--gray-700);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;font-family:var(--font);}
+.social-btn:hover{background:var(--gray-50);}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--gray-400);font-size:13px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-200);}
+.auth-form{text-align:left;}
+.auth-field{margin-bottom:14px;}
+.auth-label{font-size:13px;font-weight:500;color:var(--gray-700);display:block;margin-bottom:5px;}
+.auth-input-wrap{position:relative;}
+.auth-input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:14px;font-family:var(--font);outline:none;transition:border 0.15s;color:var(--gray-900);}
+.auth-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(13,148,136,0.1);}
+.auth-input.error-border{border-color:var(--red);}
+.auth-input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400);}
+.auth-input-right{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray-400);}
+.auth-error{font-size:12px;color:var(--red);display:flex;align-items:center;gap:4px;margin-top:4px;}
+.remember-row{display:flex;align-items:center;justify-content:space-between;margin:4px 0 16px;}
+.remember-row label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-600);cursor:pointer;}
+.forgot-link{font-size:13px;color:var(--primary);font-weight:500;cursor:pointer;text-decoration:none;}
+.auth-btn{width:100%;padding:11px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s;}
+.auth-btn:hover{background:var(--primary-dark);}
+.auth-btn:disabled{background:var(--gray-400);}
+.auth-footer{font-size:13px;color:var(--gray-500);margin-top:20px;}
+.auth-footer a,.auth-footer span.link{color:var(--primary);font-weight:600;cursor:pointer;}
+.back-link{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:var(--primary);font-weight:500;cursor:pointer;margin-top:16px;}
+.success-icon{width:56px;height:56px;border-radius:50%;background:#D1FAE5;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.email-highlight-box{background:#F0FDFA;border:1px solid #99F6E4;border-radius:var(--radius);padding:14px;font-size:13px;color:var(--primary-dark);margin:16px 0;line-height:1.6;}
+
+/* ===== ONBOARDING ===== */
+.onboard-page{min-height:100vh;background:var(--gray-100);display:flex;align-items:center;justify-content:center;padding:20px;}
+.onboard-card{background:var(--white);border-radius:16px;padding:36px 40px;width:580px;box-shadow:0 4px 24px rgba(0,0,0,0.08);}
+.steps-bar{display:flex;align-items:center;margin-bottom:32px;}
+.step-item{display:flex;flex-direction:column;align-items:center;flex:1;}
+.step-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;}
+.step-circle.active{background:var(--primary);color:#fff;}
+.step-circle.done{background:var(--primary);color:#fff;}
+.step-circle.pending{background:var(--gray-200);color:var(--gray-500);}
+.step-label{font-size:11px;color:var(--gray-500);margin-top:6px;text-align:center;}
+.step-connector{flex:1;height:2px;background:var(--gray-200);margin:-18px 4px 0;}
+.step-connector.done{background:var(--primary);}
+.onboard-title{font-size:22px;font-weight:700;color:var(--gray-900);margin-bottom:6px;}
+.onboard-sub{font-size:13.5px;color:var(--gray-500);margin-bottom:24px;}
+.plan-option{border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:14px 16px;cursor:pointer;margin-bottom:10px;transition:all 0.15s;}
+.plan-option:hover{border-color:var(--primary);}
+.plan-option.selected{border-color:var(--primary);background:var(--primary-bg);}
+.plan-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.plan-name{font-size:15px;font-weight:600;color:var(--gray-900);}
+.plan-price{font-size:15px;font-weight:700;color:var(--gray-900);}
+.plan-recommended{font-size:12px;color:var(--primary);font-weight:500;}
+.plan-feature{font-size:13px;color:var(--gray-500);}
+.invite-row{display:grid;grid-template-columns:1fr 140px;gap:10px;margin-bottom:12px;}
+.integration-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:10px;}
+.integration-name{font-size:14px;font-weight:600;color:var(--gray-900);}
+.integration-desc{font-size:12px;color:var(--gray-500);}
+.onboard-note{background:var(--gray-100);border-radius:var(--radius);padding:12px;font-size:12.5px;color:var(--gray-500);margin-bottom:20px;}
+.onboard-footer{display:flex;justify-content:space-between;align-items:center;margin-top:24px;}
+
+/* ===== LANDING PAGE ===== */
+.landing{min-height:100vh;background:#fff;}
+.landing-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;border-bottom:1px solid var(--gray-200);}
+.landing-hero{text-align:center;padding:80px 40px 60px;}
+.landing-hero h1{font-size:48px;font-weight:800;color:var(--gray-900);line-height:1.15;margin-bottom:16px;}
+.landing-hero p{font-size:16px;color:var(--gray-500);max-width:560px;margin:0 auto 32px;}
+.hero-btns{display:flex;justify-content:center;gap:12px;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;margin:0 auto;padding:0 40px 80px;}
+.feature-card{border:1px solid var(--gray-200);border-radius:12px;padding:24px;}
+.feature-icon{width:40px;height:40px;border-radius:8px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--primary);}
+.feature-title{font-size:15px;font-weight:600;color:var(--gray-900);margin-bottom:8px;}
+.feature-desc{font-size:13.5px;color:var(--gray-500);line-height:1.6;}
+.features-heading{text-align:center;padding:40px 40px 32px;}
+.features-heading h2{font-size:28px;font-weight:700;color:var(--gray-900);}
+.cta-section{text-align:center;padding:60px 40px;background:var(--gray-50);border-top:1px solid var(--gray-200);}
+.cta-section h2{font-size:28px;font-weight:700;margin-bottom:12px;}
+.cta-section p{font-size:14.5px;color:var(--gray-500);margin-bottom:28px;}
+.landing-footer{text-align:center;padding:20px;font-size:13px;color:var(--gray-400);border-top:1px solid var(--gray-200);}
+
+/* ===== DASHBOARD ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.attention-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:20px;}
+.attention-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--gray-100);}
+.attention-title{font-size:14px;font-weight:600;}
+.attention-item{padding:14px 20px;border-bottom:1px solid var(--gray-100);display:flex;justify-content:space-between;}
+.attention-item:last-child{border-bottom:none;}
+.attention-item-left strong{font-size:13.5px;font-weight:500;display:block;}
+.attention-item-left span{font-size:12px;color:var(--gray-500);}
+.attention-time{font-size:12px;color:var(--gray-400);}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.chart-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;}
+.chart-title{font-size:14px;font-weight:600;margin-bottom:16px;}
+.actions-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.quick-actions-card,.recent-activity-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;}
+.quick-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.quick-action-btn{border:1px solid var(--gray-200);border-radius:var(--radius);padding:12px;cursor:pointer;background:var(--white);font-size:13px;color:var(--gray-700);display:flex;align-items:center;gap:8px;font-family:var(--font);}
+.quick-action-btn:hover{background:var(--gray-50);}
+.activity-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-100);}
+.activity-item:last-child{border-bottom:none;}
+.activity-dot{width:28px;height:28px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.activity-content{flex:1;}
+.activity-title{font-size:13px;font-weight:500;}
+.activity-sub{font-size:12px;color:var(--gray-400);}
+.activity-time{font-size:12px;color:var(--gray-400);white-space:nowrap;}
+.view-all-link{font-size:13px;color:var(--primary);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px;}
+
+/* ===== WORKFORCE ===== */
+.workers-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.worker-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;}
+.worker-header{display:flex;justify-content:space-between;margin-bottom:12px;}
+.worker-name{font-size:15px;font-weight:600;color:var(--gray-900);}
+.worker-rating{font-size:13px;color:var(--gray-500);}
+.rating-val{font-size:16px;font-weight:700;color:var(--gray-900);}
+.skills-row{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;}
+.worker-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.worker-meta span{font-size:13px;color:var(--gray-500);}
+.worker-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.worker-profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.worker-stat-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:12px;}
+.ws-icon{width:40px;height:40px;border-radius:8px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;color:var(--primary);}
+.ws-val{font-size:20px;font-weight:700;color:var(--gray-900);}
+.ws-label{font-size:12px;color:var(--gray-500);}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--gray-200);margin-bottom:20px;}
+.tab-item{padding:10px 16px;font-size:13.5px;cursor:pointer;border-bottom:2px solid transparent;color:var(--gray-500);font-weight:400;transition:all 0.15s;}
+.tab-item.active{color:var(--gray-900);border-bottom-color:var(--gray-900);font-weight:500;}
+
+/* ===== CLIENT PROFILE ===== */
+.client-profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.cp-stat{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.cp-icon{width:36px;height:36px;border-radius:8px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;color:var(--primary);}
+.cp-label{font-size:11px;color:var(--gray-500);}
+.cp-val{font-size:14px;font-weight:600;color:var(--gray-900);}
+.info-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;}
+.info-card h3{font-size:14px;font-weight:600;margin-bottom:16px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.info-field label{font-size:12px;color:var(--gray-500);margin-bottom:4px;display:block;}
+.info-field span{font-size:13.5px;color:var(--gray-900);}
+.back-btn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gray-500);cursor:pointer;margin-bottom:4px;}
+.back-btn:hover{color:var(--gray-900);}
+
+/* ===== ROSTERING ===== */
+.roster-week{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;}
+.roster-header{display:flex;align-items:center;justify-content:center;gap:20px;padding:14px 20px;border-bottom:1px solid var(--gray-200);}
+.week-nav{display:flex;align-items:center;gap:8px;}
+.week-label{font-size:14px;font-weight:600;color:var(--gray-900);}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--gray-100);}
+.day-col{border-right:1px solid var(--gray-100);min-height:200px;padding:8px;}
+.day-col:last-child{border-right:none;}
+.day-header{text-align:center;margin-bottom:8px;}
+.day-name{font-size:11px;color:var(--gray-400);text-transform:uppercase;font-weight:500;}
+.day-num{font-size:15px;font-weight:600;color:var(--gray-900);}
+.shift-block{border-radius:6px;padding:6px 8px;margin-bottom:6px;cursor:pointer;}
+.shift-block.teal{background:#CCFBF1;border-left:3px solid var(--primary);}
+.shift-block.pink{background:#FEE2E2;border-left:3px solid #F87171;}
+.shift-block.light-teal{background:#E0F2FE;border-left:3px solid #38BDF8;}
+.shift-time{font-size:11px;font-weight:600;color:var(--gray-700);}
+.shift-client{font-size:11px;color:var(--gray-600);}
+.shift-worker{font-size:11px;color:var(--gray-400);}
+.roster-bottom{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.roster-section{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;}
+.roster-section h3{font-size:14px;font-weight:600;margin-bottom:14px;}
+.open-shift-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-100);}
+.open-shift-item:last-child{border-bottom:none;}
+.confirmed-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-100);}
+.confirmed-item:last-child{border-bottom:none;}
+
+/* ===== TIMESHEETS ===== */
+.ts-header-right{font-size:13px;color:var(--gray-500);display:flex;align-items:center;gap:6px;}
+
+/* ===== LIVE TRACKING ===== */
+.tracking-layout{display:grid;grid-template-columns:1fr 300px;gap:0;height:calc(100vh - var(--header-h) - 48px - 120px);min-height:500px;}
+.map-container{background:var(--gray-200);border-radius:var(--radius) 0 0 var(--radius);overflow:hidden;position:relative;border:1px solid var(--gray-200);}
+.map-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#E8EDF0;position:relative;}
+#liveMap,#historyMap{width:100%;height:500px;border-radius:var(--radius);border:1px solid var(--gray-200);}
+.tracking-sidebar{background:var(--white);border:1px solid var(--gray-200);border-left:none;border-radius:0 var(--radius) var(--radius) 0;overflow-y:auto;padding:16px;}
+.tracking-sidebar-title{font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:12px;}
+.worker-track-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-100);cursor:pointer;}
+.worker-track-item:last-child{border-bottom:none;}
+.wt-avatar{width:36px;height:36px;border-radius:50%;background:var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--gray-600);position:relative;flex-shrink:0;}
+.wt-status-dot{position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;border:2px solid #fff;}
+.wt-name{font-size:13px;font-weight:500;}
+.wt-client{font-size:11px;color:var(--gray-400);}
+.wt-speed{font-size:12px;color:var(--gray-400);margin-left:auto;}
+.track-stats{margin-top:16px;border-top:1px solid var(--gray-200);padding-top:14px;}
+.track-stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;}
+.track-stat-label{font-size:13px;color:var(--gray-500);}
+.track-stat-val{font-size:13px;font-weight:600;}
+.track-view-btns{display:flex;gap:8px;margin-bottom:12px;}
+.tracking-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.tracking-search{display:flex;align-items:center;gap:10px;flex:1;}
+.tracking-search input{flex:1;padding:8px 12px 8px 36px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:13px;font-family:var(--font);outline:none;}
+.worker-detail-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;margin-bottom:16px;}
+.wd-name{font-size:15px;font-weight:600;color:var(--gray-900);}
+.wd-field{display:flex;align-items:flex-start;gap:8px;margin:8px 0;font-size:13px;}
+.wd-field label{color:var(--gray-400);font-size:12px;width:90px;flex-shrink:0;}
+.wd-field span{color:var(--gray-900);font-weight:500;}
+.wd-actions{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+
+/* ===== TRACKING HISTORY ===== */
+.th-filters{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;margin-bottom:16px;}
+.th-filters-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+.th-main{display:grid;grid-template-columns:1fr 320px;gap:16px;}
+.th-shift-details{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;}
+.th-section-title{font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:12px;}
+.checkpoint-item{display:flex;gap:10px;margin-bottom:12px;}
+.checkpoint-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px;}
+.checkpoint-dot.green{background:var(--green);}
+.checkpoint-dot.teal{background:var(--primary);}
+.checkpoint-dot.red{background:var(--red);}
+.checkpoint-label{font-size:13px;font-weight:500;}
+.checkpoint-time{font-size:12px;color:var(--gray-400);}
+.checkpoint-coord{font-size:11px;color:var(--gray-400);}
+.trip-summary{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;margin-top:16px;}
+.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+.trip-stat{text-align:center;padding:12px;}
+.trip-stat-val{font-size:18px;font-weight:700;color:var(--primary);}
+.trip-stat-label{font-size:12px;color:var(--gray-500);}
+
+/* ===== BILLING ===== */
+.billing-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+.billing-stat{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;display:flex;align-items:center;gap:16px;}
+.billing-stat-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.billing-stat-label{font-size:12px;color:var(--gray-500);margin-bottom:4px;}
+.billing-stat-val{font-size:22px;font-weight:700;color:var(--gray-900);}
+.inv-actions{display:flex;align-items:center;gap:8px;}
+.integration-section{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;margin-top:20px;}
+.integration-section h3{font-size:15px;font-weight:600;margin-bottom:16px;}
+.integrations-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.int-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+.int-name{font-size:14px;font-weight:600;color:var(--gray-900);}
+.int-desc{font-size:12px;color:var(--gray-400);}
+
+/* ===== REPORTS ===== */
+.reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.report-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;}
+.report-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.report-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.report-title{font-size:14px;font-weight:600;color:var(--gray-900);}
+.report-desc{font-size:12px;color:var(--gray-500);margin-top:2px;}
+.report-stats{display:flex;gap:24px;margin-bottom:14px;}
+.rs-item label{font-size:11px;color:var(--gray-400);display:block;}
+.rs-item span{font-size:14px;font-weight:600;color:var(--gray-900);}
+.rs-change{font-size:11px;font-weight:500;}
+.rs-change.up{color:var(--green);}
+.rs-change.down{color:var(--red);}
+.report-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--gray-100);}
+.report-last{font-size:12px;color:var(--gray-400);}
+.report-actions{display:flex;align-items:center;gap:8px;}
+.report-action-btn{padding:6px;border:none;background:transparent;cursor:pointer;color:var(--gray-400);border-radius:4px;}
+.report-action-btn:hover{color:var(--primary);}
+
+/* ===== SETTINGS ===== */
+.settings-tabs{display:flex;gap:0;border-bottom:1px solid var(--gray-200);margin-bottom:24px;}
+.settings-tab{padding:10px 16px;font-size:13.5px;cursor:pointer;color:var(--gray-500);display:flex;align-items:center;gap:6px;border-bottom:2px solid transparent;transition:all 0.15s;font-weight:400;}
+.settings-tab:hover{color:var(--gray-900);}
+.settings-tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:500;}
+.settings-section{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.settings-section h3{font-size:15px;font-weight:600;color:var(--gray-900);margin-bottom:16px;}
+.settings-section p.sub{font-size:13px;color:var(--gray-500);margin-bottom:16px;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100);}
+.setting-row:last-child{border-bottom:none;}
+.setting-label{font-size:13.5px;font-weight:500;color:var(--gray-900);}
+.setting-desc{font-size:12px;color:var(--gray-500);}
+.toggle{width:44px;height:24px;background:var(--gray-200);border-radius:12px;cursor:pointer;position:relative;transition:background 0.2s;}
+.toggle.on{background:var(--primary);}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.toggle.on::after{left:23px;}
+.org-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.role-card{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100);}
+.role-card:last-child{border-bottom:none;}
+.role-name{font-size:13.5px;font-weight:600;color:var(--gray-900);}
+.role-users{font-size:12px;color:var(--gray-400);margin-left:6px;}
+.role-desc{font-size:12px;color:var(--gray-500);margin-top:2px;}
+.role-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.audit-item{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--gray-100);}
+.audit-item:last-child{border-bottom:none;}
+.audit-user{font-size:13px;font-weight:500;color:var(--gray-900);}
+.audit-action{font-size:12px;color:var(--gray-500);}
+.audit-time{font-size:12px;color:var(--gray-400);}
+.manage-roles-btn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--primary);font-weight:500;cursor:pointer;}
+.int-row{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-100);}
+.int-row:last-child{border-bottom:none;}
+.int-row-name{font-size:13.5px;font-weight:600;}
+.int-row-desc{font-size:12px;color:var(--gray-500);}
+.int-row-extra{font-size:11px;color:var(--gray-400);}
+.int-row-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.data-item{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--gray-100);}
+.data-item:last-child{border-bottom:none;}
+.data-item.danger{background:#FEF2F2;border-radius:var(--radius);padding:14px;border:1px solid #FEE2E2;margin-top:8px;}
+.data-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.data-icon.primary{background:var(--primary-bg);color:var(--primary);}
+.data-icon.danger{background:var(--red-light);color:var(--red);}
+.permission-item{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:8px;}
+.perm-label{font-size:13px;font-weight:500;}
+.perm-desc{font-size:12px;color:var(--gray-500);}
+.select-sm{padding:6px 10px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;font-family:var(--font);outline:none;}
+.connected-badge{display:inline-flex;align-items:center;gap:4px;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:20px;padding:2px 8px;font-size:12px;color:var(--gray-600);}
+.report-chart-mini{height:100px;margin:12px 0;}
+.view-all-logs{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--primary);font-weight:500;cursor:pointer;margin-top:14px;}
+/* tooltip/dropdown */
+.dropdown{position:relative;}
+.dropdown-menu{position:absolute;right:0;top:36px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);box-shadow:var(--shadow-lg);z-index:50;min-width:160px;padding:4px;}
+.dropdown-item{padding:8px 12px;font-size:13px;color:var(--gray-700);cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;}
+.dropdown-item:hover{background:var(--gray-50);}
+.dropdown-item.danger{color:var(--red);}
+
+/* ===== HAMBURGER / MOBILE ===== */
+.hamburger-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--gray-700);align-items:center;justify-content:center;border-radius:6px;}
+.hamburger-btn:hover{background:var(--gray-100);}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:199;}
+.sidebar-overlay.open{display:block;}
+
+/* ===== AI CHAT ===== */
+.ai-fab{position:fixed;bottom:24px;right:24px;width:50px;height:50px;border-radius:50%;background:var(--primary);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(13,148,136,0.45);z-index:300;transition:all .2s;}
+.ai-fab:hover{background:var(--primary-dark);transform:scale(1.06);}
+.ai-panel{position:fixed;bottom:82px;right:24px;width:330px;background:#fff;border:1px solid var(--gray-200);border-radius:16px;box-shadow:var(--shadow-xl);z-index:300;display:flex;flex-direction:column;animation:modalIn .2s ease;}
+.ai-ph{padding:13px 16px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;}
+.ai-ph-title{font-size:13.5px;font-weight:600;color:var(--gray-900);display:flex;align-items:center;gap:7px;}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.ai-msgs{flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:9px;max-height:280px;min-height:120px;}
+.ai-m{max-width:86%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.5;}
+.ai-m.user{background:var(--primary);color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
+.ai-m.bot{background:var(--gray-100);color:var(--gray-900);align-self:flex-start;border-bottom-left-radius:3px;}
+.ai-ir{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--gray-100);}
+.ai-inp{flex:1;padding:8px 11px;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:13px;font-family:var(--font);outline:none;}
+.ai-inp:focus{border-color:var(--primary);}
+.ai-sb{padding:8px 11px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;}
+.ai-sb:hover{background:var(--primary-dark);}
+.ai-sb:disabled{background:var(--gray-300);cursor:not-allowed;}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .charts-row{grid-template-columns:1fr;}
+  .actions-row{grid-template-columns:1fr;}
+  .workers-grid{grid-template-columns:1fr;}
+  .client-profile-stats{grid-template-columns:repeat(2,1fr);}
+  .worker-profile-stats{grid-template-columns:repeat(2,1fr);}
+  .reports-grid{grid-template-columns:1fr;}
+  .billing-stats{grid-template-columns:1fr;}
+  .integrations-grid{grid-template-columns:1fr;}
+  .th-filters-grid{grid-template-columns:1fr 1fr;}
+  .th-main{grid-template-columns:1fr;}
+  .tracking-layout{grid-template-columns:1fr;}
+  .roster-bottom{grid-template-columns:1fr;}
+  .info-grid{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .org-form-grid{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  :root{--sidebar-w:0px;}
+  .sidebar{position:fixed;left:-248px;width:240px;top:0;bottom:0;z-index:200;transition:left .25s;box-shadow:none;}
+  .sidebar.open{left:0;box-shadow:var(--shadow-xl);}
+  .hamburger-btn{display:flex;}
+  .topbar{padding:0 14px;}
+  .page-content{padding:14px;}
+  .landing-nav{padding:12px 18px;}
+  .landing-hero{padding:44px 18px 36px;}
+  .landing-hero h1{font-size:30px;}
+  .hero-btns{flex-direction:column;align-items:center;}
+  .features-grid{grid-template-columns:1fr;padding:0 18px 40px;}
+  .features-heading{padding:28px 18px 18px;}
+  .cta-section{padding:36px 18px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .auth-card{width:93vw;padding:26px 18px;}
+  .onboard-card{width:93vw;padding:22px 18px;}
+  .modal{width:93vw;margin:0 auto;}
+  .modal-lg{width:93vw;}
+  .page-header{flex-direction:column;gap:10px;align-items:flex-start;}
+  .table-search-bar{flex-wrap:wrap;}
+  .worker-actions{grid-template-columns:1fr;}
+  .th-filters-grid{grid-template-columns:1fr;}
+  .settings-tabs{overflow-x:auto;white-space:nowrap;}
+  .invite-row{grid-template-columns:1fr;}
+  .ai-panel{width:calc(100vw - 28px);right:14px;bottom:76px;}
+  .ai-fab{bottom:14px;right:14px;}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr;}
+  .client-profile-stats{grid-template-columns:1fr 1fr;}
+  .landing-hero h1{font-size:24px;}
+  .topbar-right .org-switcher{display:none;}
+  th,td{padding:9px 10px;font-size:12.5px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== SVG ICONS DEFS ==================== -->
+<svg style="display:none">
+<defs>
+<symbol id="ic-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+<symbol id="ic-clients" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="ic-workforce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+<symbol id="ic-rostering" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+<symbol id="ic-timesheets" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+<symbol id="ic-tracking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></symbol>
+<symbol id="ic-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></symbol>
+<symbol id="ic-billing" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+<symbol id="ic-reports" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+<symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07m14.14 0A10 10 0 0 0 4.93 4.93"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></symbol>
+<symbol id="ic-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+<symbol id="ic-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+<symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+<symbol id="ic-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+<symbol id="ic-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+<symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></symbol>
+<symbol id="ic-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+<symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+<symbol id="ic-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+<symbol id="ic-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></symbol>
+<symbol id="ic-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></symbol>
+<symbol id="ic-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+<symbol id="ic-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+<symbol id="ic-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+<symbol id="ic-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.02 6.02l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="ic-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+<symbol id="ic-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+<symbol id="ic-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+<symbol id="ic-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+<symbol id="ic-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+<symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+<symbol id="ic-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+<symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+<symbol id="ic-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+<symbol id="ic-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+<symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></symbol>
+<symbol id="ic-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+<symbol id="ic-user-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><circle cx="19" cy="19" r="2"/><path d="M19 17v-1.5M19 21v-1.5M17.24 18.26l1.3-.75M20.76 17l-1.3.75M17.24 19.74l1.3.75M20.76 20.5l-1.3-.75"/></symbol>
+<symbol id="ic-switch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
+<symbol id="ic-geofence" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></symbol>
+<symbol id="ic-path" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7 7-4 4 8 8"/><circle cx="20" cy="4" r="1"/></symbol>
+<symbol id="ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+<symbol id="ic-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></symbol>
+<symbol id="ic-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+<symbol id="ic-call" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.69 19a19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.69 5.18 2 2 0 0 1 4.7 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.91 10.6a16 16 0 0 0 6.02 6.02l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+<symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></symbol>
+<symbol id="ic-org" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></symbol>
+<symbol id="ic-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+<symbol id="ic-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+</defs>
+</svg>
+
+<!-- ==================== PAGES CONTAINER ==================== -->
+<div id="app"></div>
+
+<script>
+// ==================== STATE ====================
+const state = {
+  page: 'landing',
+  subPage: null,
+  modal: null,
+  selectedClient: null,
+  selectedWorker: null,
+  settingsTab: 'organization',
+  userMenuOpen: false,
+  trackingView: 'map',
+  selectedWorkerTrack: null,
+  reportView: null,
+  reportExport: false,
+  reportSchedule: false,
+  invoiceView: null,
+  liveMap: null,
+  historyMap: null
+};
+
+// ==================== DATA ====================
+const clients = [
+  {id:'CL-0001',name:'Emma Watson',status:'active',type:'NDIS',plan:'Core + Capacity Building',workers:3,budget:42500,spent:18200,lastVisit:'2025-12-23'},
+  {id:'CL-0002',name:'Robert Chen',status:'active',type:'NDIS',plan:'Core Supports',workers:2,budget:28000,spent:12500,lastVisit:'2025-12-24'},
+  {id:'CL-0003',name:'Margaret Smith',status:'active',type:'Aged Care',plan:'Home Care Package Level 3',workers:4,budget:35000,spent:16800,lastVisit:'2025-12-22'},
+  {id:'CL-0004',name:'David Brown',status:'paused',type:'NDIS',plan:'Core Supports',workers:1,budget:22000,spent:8500,lastVisit:'2025-12-10'},
+];
+const workers = [
+  {id:'WK-0001',name:'Sarah Johnson',status:'available',rating:4.9,skills:['NDIS','Personal Care','Medication'],shifts:24},
+  {id:'WK-0002',name:'Michael Brown',status:'on-shift',rating:4.8,skills:['Aged Care','Nursing'],shifts:18},
+  {id:'WK-0003',name:'Jessica Martinez',status:'available',rating:5,skills:['Disability Support','Transport'],shifts:32},
+  {id:'WK-0004',name:'David Lee',status:'unavailable',rating:4.7,skills:['NDIS','Behavioural Support'],shifts:15},
+];
+const timesheets = [
+  {id:'TS-0001',worker:'Sarah Johnson',client:'Emma Watson',date:'2025-12-24',start:'08:02',end:'12:05',hours:4,status:'pending',notes:'Personal care and meal preparation',progress:'Client was in good spirits. Assisted with morning routine and prepared lunch. No concerns noted.'},
+  {id:'TS-0002',worker:'Michael Brown',client:'Margaret Smith',date:'2025-12-24',start:'10:00',end:'14:00',hours:4,status:'approved',notes:'Aged care support',progress:'All tasks completed.'},
+  {id:'TS-0003',worker:'Jessica Martinez',client:'Emma Watson',date:'2025-12-23',start:'16:15',end:'20:10',hours:4,status:'pending',notes:'Evening support',progress:''},
+  {id:'TS-0004',worker:'David Lee',client:'Robert Chen',date:'2025-12-23',start:'10:00',end:'13:00',hours:3,status:'rejected',notes:'Community access',progress:''},
+];
+const invoices = [
+  {id:'INV-2024-0152',client:'Emma Watson',amount:1240,date:'2025-12-20',due:'2025-12-27',status:'paid'},
+  {id:'INV-2024-0151',client:'Robert Chen',amount:820,date:'2025-12-18',due:'2025-12-25',status:'pending'},
+  {id:'INV-2024-0150',client:'Margaret Smith',amount:1560,date:'2025-12-15',due:'2025-12-22',status:'paid'},
+  {id:'INV-2024-0149',client:'David Brown',amount:640,date:'2025-12-12',due:'2025-12-19',status:'overdue'},
+];
+const reports = [
+  {id:'workforce',title:'Workforce Report',desc:'Staff utilization, hours worked, and performance metrics',status:'scheduled',icon:'ic-users',iconBg:'#E0F2FE',iconColor:'#0284C7',stats:[{l:'Total Staff',v:'156',c:'+8%',up:true},{l:'Hours Worked',v:'2,840',c:'+12%',up:true},{l:'Utilization',v:'87%',c:'+3%',up:true}],lastRun:'Just now'},
+  {id:'financial',title:'Financial Report',desc:'Revenue, expenses, and profitability analysis',status:'ready',icon:'ic-dollar',iconBg:'#FEF9C3',iconColor:'#CA8A04',stats:[{l:'Revenue',v:'$125,800',c:'+15%',up:true},{l:'Expenses',v:'$68,400',c:'+5%',up:true},{l:'Profit Margin',v:'45.6%',c:'+2.1%',up:true}],lastRun:'2 days ago'},
+  {id:'compliance',title:'Compliance Report',desc:'Certification status, document expiry, and audits',status:'ready',icon:'ic-activity',iconBg:'#DCFCE7',iconColor:'#16A34A',stats:[{l:'Compliance Rate',v:'94%',c:'+2%',up:true},{l:'Expiring Soon',v:'12',c:'-3',up:false},{l:'Audit Score',v:'92/100',c:'+5',up:true}],lastRun:'Last week'},
+  {id:'client-activity',title:'Client Activity Report',desc:'Service hours, care plans, and client satisfaction',status:'ready',icon:'ic-file',iconBg:'#F0F9FF',iconColor:'#0369A1',stats:[{l:'Active Clients',v:'284',c:'+6%',up:true},{l:'Service Hours',v:'3,120',c:'+10%',up:true},{l:'Satisfaction',v:'4.8/5',c:'+0.2',up:true}],lastRun:'Yesterday at 11:30 PM'},
+  {id:'timesheet',title:'Timesheet Analytics',desc:'Time tracking, approval rates, and anomalies',status:'ready',icon:'ic-clock',iconBg:'#F0FDFA',iconColor:'#0D9488',stats:[{l:'Pending Approval',v:'45',c:'-12',up:false},{l:'Approved Rate',v:'96%',c:'+1%',up:true},{l:'Total Hours',v:'2,450',c:'+8%',up:true}],lastRun:'3 hours ago'},
+  {id:'payroll',title:'Payroll Report',desc:'Salary disbursement, overtime, and deductions',status:'ready',icon:'ic-activity',iconBg:'#FEF2F2',iconColor:'#DC2626',stats:[{l:'Total Payroll',v:'$92,500',c:'+7%',up:true},{l:'Overtime',v:'$12,300',c:'+15%',up:true},{l:'Avg Salary',v:'$3,250',c:'+2%',up:true}],lastRun:'5 days ago'},
+];
+const auditLogs = [
+  {user:'John Smith',action:'Updated client profile',detail:'Changed contact details for Emma Watson',time:'2 minutes ago'},
+  {user:'Sarah Johnson',action:'Approved timesheet',detail:'Approved timesheet TS-2024-0234',time:'15 minutes ago'},
+  {user:'Michael Chen',action:'Created invoice',detail:'Generated invoice INV-2024-0156',time:'1 hour ago'},
+  {user:'Emily Davis',action:'Added new staff',detail:'Onboarded new staff member Robert Wilson',time:'2 hours ago'},
+];
+
+function svg(id,size=16){return `<svg width="${size}" height="${size}"><use href="#${id}"/></svg>`;}
+function render(){document.getElementById('app').innerHTML=getPage();postRender();}
+function navigate(page,sub=null){state.page=page;state.subPage=sub;state.modal=null;state.userMenuOpen=false;render();}
+
+// ==================== LOGO SVG ====================
+function logoSVG(size=32){
+return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M15 15 L15 27 L43 27 L43 85 L57 85 L57 27 L85 27 L85 15 Z" fill="#1BB3A9"/>
+  <path d="M43 38 C43 50 47 62 57 72 L57 85 C57 85 40 72 36 57 C32 42 36 27 36 27 L43 27 Z" fill="#00736C" opacity="0.55"/>
+</svg>`;}
+
+// ==================== SIDEBAR ====================
+function sidebarHTML(active){
+  const items=[
+    {id:'dashboard',label:'Dashboard',icon:'ic-dashboard'},
+    {id:'clients',label:'Clients',icon:'ic-clients'},
+    {id:'workforce',label:'Workforce',icon:'ic-workforce'},
+    {id:'rostering',label:'Rostering',icon:'ic-rostering'},
+    {id:'timesheets',label:'Timesheets',icon:'ic-timesheets'},
+    {id:'live-tracking',label:'Live Tracking',icon:'ic-tracking'},
+    {id:'tracking-history',label:'Tracking History',icon:'ic-history'},
+    {id:'billing',label:'Billing',icon:'ic-billing'},
+    {id:'reports',label:'Reports',icon:'ic-reports'},
+    {id:'settings',label:'Settings',icon:'ic-settings'},
+  ];
+  return `<div class="sidebar">
+    <div class="sidebar-logo">
+      ${logoSVG(32)}
+      <span class="logo-text">teamora</span>
+    </div>
+    <nav class="nav-menu">
+      ${items.map(i=>`<div class="nav-item${active===i.id?' active':''}" onclick="navigate('${i.id}')">${svg(i.icon,16)}<span>${i.label}</span></div>`).join('')}
+    </nav>
+    <div class="sidebar-user" onclick="toggleUserMenu()">
+      <div class="user-avatar">JS</div>
+      <div class="user-info"><div class="user-name">John Smith</div><div class="user-role">Admin</div></div>
+      ${svg('ic-chevron-down',14)}
+      ${state.userMenuOpen?`<div class="user-menu">
+        <div class="user-menu-item">${svg('ic-user-cog',14)} Profile Settings</div>
+        <div class="user-menu-item">${svg('ic-switch',14)} Switch Organization</div>
+        <div class="user-menu-item" onclick="navigate('landing')">${svg('ic-logout',14)} Log out</div>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+function toggleUserMenu(){state.userMenuOpen=!state.userMenuOpen;render();}
+
+// ==================== TOPBAR ====================
+function topbarHTML(title){
+  return `<div class="topbar">
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="hamburger-btn" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <span class="topbar-title">${title}</span>
+    </div>
+    <div class="topbar-right">
+      <div class="notif-btn">${svg('ic-bell',18)}<div class="notif-dot"></div></div>
+      <div class="org-switcher">Acme Care Services ${svg('ic-chevron-down',14)}</div>
+    </div>
+  </div>`;
+}
+function toggleSidebar(){
+  var sb=document.querySelector('.sidebar');
+  var ov=document.querySelector('.sidebar-overlay');
+  if(sb) sb.classList.toggle('open');
+  if(ov) ov.classList.toggle('open');
+}
+
+// ==================== APP LAYOUT ====================
+function appLayout(navActive,topTitle,content){
+  return `<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+<div class="app-layout">${sidebarHTML(navActive)}
+    <div class="main-content">${topbarHTML(topTitle)}
+      <div class="page-content">${content}</div>
+    </div></div>
+    ${state.modal?getModal():''}
+    ${aiHTML()}`;
+}
+
+// ==================== PAGES ====================
+function getPage(){
+  if(state.page==='landing')return landingPage();
+  if(state.page==='login')return loginPage();
+  if(state.page==='register')return registerPage();
+  if(state.page==='forgot-password')return forgotPasswordPage();
+  if(state.page==='check-email')return checkEmailPage();
+  if(state.page==='onboarding')return onboardingPage();
+  if(state.page==='dashboard')return dashboardPage();
+  if(state.page==='clients'){
+    if(state.selectedClient)return clientProfilePage();
+    return clientsPage();
+  }
+  if(state.page==='workforce'){
+    if(state.selectedWorker)return workerProfilePage();
+    return workforcePage();
+  }
+  if(state.page==='rostering')return rosteringPage();
+  if(state.page==='timesheets')return timesheetsPage();
+  if(state.page==='live-tracking')return liveTrackingPage();
+  if(state.page==='tracking-history')return trackingHistoryPage();
+  if(state.page==='billing')return billingPage();
+  if(state.page==='reports')return reportsPage();
+  if(state.page==='settings')return settingsPage();
+  return landingPage();
+}
+
+// ==================== LANDING ====================
+function landingPage(){
+  return `<div class="landing">
+    <nav class="landing-nav">
+      <div class="flex items-center gap-2">${logoSVG(36)}<span style="font-size:20px;font-weight:700;color:var(--gray-900)">teamora</span></div>
+      <div class="flex items-center gap-3">
+        <span style="font-size:14px;color:var(--gray-600);cursor:pointer" onclick="navigate('login')">Pricing</span>
+        <span style="font-size:14px;color:var(--gray-600);cursor:pointer" onclick="navigate('login')">Login</span>
+        <button class="btn btn-primary" onclick="navigate('register')">Get Started</button>
+      </div>
+    </nav>
+    <div class="landing-hero">
+      <h1>Teamora<br>Management Simplified.</h1>
+      <p>Streamline your operations with our comprehensive platform for NDIS, aged care, cleaning, security, and hospitality services.</p>
+      <div class="hero-btns">
+        <button class="btn btn-primary" style="padding:12px 28px;font-size:15px" onclick="navigate('register')">Start Free Trial</button>
+        <button class="btn btn-secondary" style="padding:12px 28px;font-size:15px" onclick="navigate('login')">View Pricing</button>
+      </div>
+    </div>
+    <div class="features-heading"><h2>Everything you need to manage your care business</h2></div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">${svg('ic-clients',20)}</div><div class="feature-title">Client & Workforce Management</div><p class="feature-desc">Manage participants, staff, and rosters all in one place with powerful scheduling tools.</p></div>
+      <div class="feature-card"><div class="feature-icon">${svg('ic-rostering',20)}</div><div class="feature-title">Smart Rostering</div><p class="feature-desc">Drag-and-drop scheduling with automated matching and conflict detection.</p></div>
+      <div class="feature-card"><div class="feature-icon">${svg('ic-timesheets',20)}</div><div class="feature-title">Timesheets & Notes</div><p class="feature-desc">Digital timesheets with GPS tracking and progress notes for every shift.</p></div>
+      <div class="feature-card"><div class="feature-icon">${svg('ic-billing',20)}</div><div class="feature-title">Billing & Invoicing</div><p class="feature-desc">Automated invoicing with Xero and QuickBooks integration.</p></div>
+      <div class="feature-card"><div class="feature-icon">${svg('ic-shield',20)}</div><div class="feature-title">Compliance Ready</div><p class="feature-desc">Built-in compliance tracking for NDIS, aged care, and industry standards.</p></div>
+      <div class="feature-card"><div class="feature-icon">${svg('ic-zap',20)}</div><div class="feature-title">Real-time Insights</div><p class="feature-desc">Comprehensive reporting and analytics to drive better decisions.</p></div>
+    </div>
+    <div class="cta-section">
+      <h2>Ready to get started?</h2>
+      <p>Join hundreds of care providers streamlining their operations</p>
+      <button class="btn btn-primary" style="padding:12px 28px;font-size:15px" onclick="navigate('register')">Start Your Free Trial</button>
+    </div>
+    <div class="landing-footer">© 2025 Teamora. All rights reserved.</div>
+  </div>`;
+}
+
+// ==================== LOGIN ====================
+function loginPage(){
+  return `<div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">${logoSVG(44)}<span class="auth-logo-text">teamora</span></div>
+      <div class="auth-title">Welcome back!</div>
+      <div class="auth-subtitle">Sign in to continue to Teamora</div>
+      <button class="social-btn"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continue with Google</button>
+      <button class="social-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Continue with Facebook</button>
+      <div class="divider">Or continue with email</div>
+      <div class="auth-form">
+        <div class="auth-field"><label class="auth-label">Email address</label>
+          <div class="auth-input-wrap">${svg('ic-mail',16)} <input class="auth-input" placeholder="Email" type="email" style="padding-left:38px" id="loginEmail">
+          <span class="auth-input-icon" style="left:12px;top:50%;transform:translateY(-50%);position:absolute"></span></div>
+        </div>
+        <div class="auth-field"><label class="auth-label">Password</label>
+          <div class="auth-input-wrap" style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-lock',16)}</span>
+          <input class="auth-input" type="password" placeholder="Password" id="loginPass" style="padding-right:40px">
+          <span class="auth-input-right" onclick="togglePass('loginPass')">${svg('ic-eye',16)}</span></div>
+        </div>
+        <div class="remember-row">
+          <label><input type="checkbox"> Remember me</label>
+          <span class="forgot-link" onclick="navigate('forgot-password')">Forgot password?</span>
+        </div>
+        <button class="auth-btn" onclick="navigate('dashboard')">Sign in ${svg('ic-arrow-right',16)}</button>
+      </div>
+      <div class="auth-footer">Don't have an account? <span class="link" onclick="navigate('register')">Sign up</span></div>
+    </div>
+  </div>`;
+}
+
+// ==================== REGISTER ====================
+function registerPage(){
+  return `<div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">${logoSVG(44)}<span class="auth-logo-text">teamora</span></div>
+      <div class="auth-title">Create your account</div>
+      <div class="auth-subtitle">Start your journey with Teamora</div>
+      <button class="social-btn"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continue with Google</button>
+      <button class="social-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Continue with Facebook</button>
+      <div class="divider">Or sign up with email</div>
+      <div class="auth-form">
+        <div class="auth-field"><label class="auth-label">Full name</label><div class="auth-input-wrap" style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-workforce',16)}</span><input class="auth-input" placeholder="User name"></div></div>
+        <div class="auth-field"><label class="auth-label">Email address</label><div class="auth-input-wrap" style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-mail',16)}</span><input class="auth-input" type="email" placeholder="Email"></div></div>
+        <div class="auth-field"><label class="auth-label">Password</label><div class="auth-input-wrap" style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-lock',16)}</span><input class="auth-input" type="password" placeholder="Password" style="padding-right:40px"><span class="auth-input-right">${svg('ic-eye',16)}</span></div></div>
+        <div class="auth-field"><label class="auth-label">Confirm Password</label><div class="auth-input-wrap" style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-lock',16)}</span><input class="auth-input" type="password" placeholder="Confirm Password" style="padding-right:40px"><span class="auth-input-right">${svg('ic-eye',16)}</span></div></div>
+        <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:12px;font-size:12.5px;color:var(--gray-500);margin-bottom:14px">By creating an account, you agree to our <span style="color:var(--primary);cursor:pointer">Terms of Service</span> and <span style="color:var(--primary);cursor:pointer">Privacy Policy</span></div>
+        <button class="auth-btn" style="background:var(--gray-400)" onclick="navigate('onboarding')">Create Account ${svg('ic-arrow-right',16)}</button>
+      </div>
+      <div class="auth-footer">Already have an account? <span class="link" onclick="navigate('login')">Sign in</span></div>
+    </div>
+  </div>`;
+}
+
+// ==================== FORGOT PASSWORD ====================
+function forgotPasswordPage(){
+  return `<div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">${logoSVG(44)}<span class="auth-logo-text">teamora</span></div>
+      <div class="auth-title">Reset your password</div>
+      <div class="auth-subtitle">Enter your email and we'll send you a reset link</div>
+      <div class="auth-form">
+        <div class="auth-field"><label class="auth-label">Email address</label>
+          <div class="auth-input-wrap" style="position:relative"><span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-mail',16)}</span><input class="auth-input" type="email" placeholder="Email"></div>
+        </div>
+        <button class="auth-btn" onclick="navigate('check-email')">Send reset link ${svg('ic-arrow-right',16)}</button>
+      </div>
+      <div class="back-link" onclick="navigate('login')">${svg('ic-arrow-left',14)} Back to sign in</div>
+    </div>
+  </div>`;
+}
+
+// ==================== CHECK EMAIL ====================
+function checkEmailPage(){
+  return `<div class="auth-page">
+    <div class="auth-card">
+      <div class="success-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="auth-title">Check your email</div>
+      <div style="font-size:13.5px;color:var(--gray-500);margin-bottom:4px">We've sent a password reset link to</div>
+      <div style="font-size:14px;color:var(--primary);font-weight:600;margin-bottom:16px">info@careworkforce.com</div>
+      <div class="email-highlight-box">Click the link in the email to reset your password. If you don't see it, check your spam folder.</div>
+      <button class="social-btn" style="margin-top:4px">Resend email</button>
+      <div class="back-link" onclick="navigate('login')">${svg('ic-arrow-left',14)} Back to sign in</div>
+    </div>
+  </div>`;
+}
+
+// ==================== ONBOARDING ====================
+const onboardStep = {step:1,plan:'Professional'};
+function onboardingPage(){
+  const s=onboardStep.step;
+  const stepsBar=`<div class="steps-bar">
+    <div class="step-item"><div class="step-circle ${s>1?'done':s===1?'active':'pending'}">${s>1?svg('ic-check',16):'1'}</div><div class="step-label">Business<br>Intro</div></div>
+    <div class="step-connector ${s>1?'done':''}"></div>
+    <div class="step-item"><div class="step-circle ${s>2?'done':s===2?'active':'pending'}">${s>2?svg('ic-check',16):'2'}</div><div class="step-label">Choose<br>Plan</div></div>
+    <div class="step-connector ${s>2?'done':''}"></div>
+    <div class="step-item"><div class="step-circle ${s>3?'done':s===3?'active':'pending'}">${s>3?svg('ic-check',16):'3'}</div><div class="step-label">Team<br>Members</div></div>
+    <div class="step-connector ${s>3?'done':''}"></div>
+    <div class="step-item"><div class="step-circle ${s>4?'done':s===4?'active':'pending'}">${s>3?'3':'4'}</div><div class="step-label">Setup<br>Integration</div></div>
+  </div>`;
+  let body='';
+  if(s===1){body=`<div class="onboard-title">Organization Details</div><div class="onboard-sub">Tell us about your organization</div>
+    <div class="field-group"><label class="form-label">Organization Name</label><input class="form-control" value="Acme Care Services"></div>
+    <div class="field-group"><label class="form-label">Industry Type</label><select class="form-control"><option>Select industry</option><option>NDIS</option><option>Aged Care</option><option>Hospitality</option><option>Security</option></select></div>
+    <div class="form-row"><div class="field-group"><label class="form-label">Timezone</label><select class="form-control"><option>Australia/Sydney</option></select></div>
+    <div class="field-group"><label class="form-label">Currency</label><select class="form-control"><option>AUD</option><option>USD</option></select></div></div>
+    <div class="form-row"><div class="field-group"><label class="form-label">ABN (Optional)</label><input class="form-control" placeholder="12 345 678 901"></div>
+    <div class="field-group"><label class="form-label">NDIS ID (Optional)</label><input class="form-control" placeholder="4050012345"></div></div>`;}
+  else if(s===2){body=`<div class="onboard-title">Choose Your Plan</div><div class="onboard-sub">Select a plan that fits your needs</div>
+    ${['Starter','Professional','Enterprise'].map(p=>`<div class="plan-option${onboardStep.plan===p?' selected':''}" onclick="onboardStep.plan='${p}';render()">
+      <div class="plan-header"><span class="plan-name">${p}</span><span class="plan-price">${p==='Starter'?'$99/mo':p==='Professional'?'$249/mo':'Custom'}</span></div>
+      ${p==='Professional'?'<div class="plan-recommended">Recommended</div>':''}
+      <div class="plan-feature">${p==='Starter'?'• Up to 25 staff  • Up to 50 clients  • Basic rostering':p==='Professional'?'• Up to 100 staff  • Up to 250 clients  • Advanced features':'• Unlimited staff & clients  • Custom integrations  • Dedicated support'}</div>
+    </div>`).join('')}`;}
+  else if(s===3){body=`<div class="onboard-title">Invite Team Members</div><div class="onboard-sub">Add your team to get started</div>
+    <div class="invite-row"><div class="field-group"><label class="form-label">Email</label><input class="form-control" value="caremanager@company.com"></div><div class="field-group"><label class="form-label">Role</label><select class="form-control"><option>Manager</option><option>Admin</option><option>Staff</option></select></div></div>
+    <div class="invite-row"><div class="field-group"><input class="form-control" value="careadmin@company.com"></div><div class="field-group"><select class="form-control"><option>Admin</option><option>Manager</option></select></div></div>
+    <button class="btn btn-secondary btn-sm w-full" style="justify-content:center;margin-top:4px">Add Another</button>`;}
+  else{body=`<div class="onboard-title">Setup Integrations</div><div class="onboard-sub">Connect your tools (optional)</div>
+    ${['Xero','QuickBooks','Deputy'].map(n=>`<div class="integration-item"><div><div class="integration-name">${n}</div><div style="font-size:12px;color:var(--gray-400)">${n==='Xero'?'Sync invoices and payments':n==='QuickBooks'?'Automated accounting sync':'Payroll integration'}</div></div><button class="btn btn-primary btn-sm">Connect</button></div>`).join('')}
+    <div class="onboard-note">You can set up integrations later from the Settings page.</div>`;}
+  return `<div class="onboard-page"><div class="onboard-card">
+    ${stepsBar}${body}
+    <div class="onboard-footer">
+      <button class="btn btn-secondary" onclick="if(onboardStep.step>1){onboardStep.step--;render();}else{navigate('register');}">Back</button>
+      <button class="btn btn-primary" onclick="if(onboardStep.step<4){onboardStep.step++;render();}else{navigate('dashboard');}">
+        ${s===4?'Complete Setup':'Continue'}
+      </button>
+    </div>
+  </div></div>`;
+}
+
+// ==================== DASHBOARD ====================
+function dashboardPage(){
+  return appLayout('dashboard','Dashboard',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Dashboard</h1></div>
+    </div>
+    <div class="stats-grid">
+      ${[{label:"Today's Shifts",val:'24',change:'+12%',up:true,icon:'ic-rostering'},{label:'Open Shifts',val:'8',change:'-3%',up:false,icon:'ic-clock'},{label:'Active Workers',val:'156',change:'+8%',up:true,icon:'ic-workforce'},{label:'Revenue (MTD)',val:'$67,420',change:'+18%',up:true,icon:'ic-dollar'}].map(s=>`
+      <div class="stat-card">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="stat-label">${s.label}</div>
+            <div class="flex items-center gap-2 mt-1"><div class="stat-value">${s.val}</div><span class="stat-change ${s.up?'up':'down'}">${s.change}</span></div>
+          </div>
+          <div style="color:var(--gray-300)">${svg(s.icon,22)}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+    <div class="attention-card">
+      <div class="attention-header"><span class="attention-title">Attention Required</span><span class="view-all-link">View All ${svg('ic-arrow-right',14)}</span></div>
+      <div class="attention-item"><div class="attention-item-left"><strong>Late Check-in: Sarah Johnson</strong><span>Shift started 15 minutes ago, no check-in recorded</span></div><span class="attention-time">15m ago</span></div>
+      <div class="attention-item"><div class="attention-item-left"><strong>8 Open Shifts This Week</strong><span>Tomorrow (Wed) has 3 unassigned shifts</span></div><span class="attention-time">Just now</span></div>
+      <div class="attention-item"><div class="attention-item-left"><strong>Worker Certificate Expiring</strong><span>John Brown's First Aid certificate expires in 7 days</span></div><span class="attention-time">1h ago</span></div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card"><div class="chart-title">Revenue Trend</div><canvas id="revenueChart" height="140"></canvas></div>
+      <div class="chart-card"><div class="chart-title">Shifts This Week</div><canvas id="shiftsChart" height="140"></canvas></div>
+    </div>
+    <div class="actions-row">
+      <div class="quick-actions-card"><div class="chart-title">Quick Actions</div>
+        <div class="quick-actions-grid">
+          <button class="quick-action-btn" onclick="navigate('clients');openModal('addClient')">${svg('ic-workforce',16)} Add Client</button>
+          <button class="quick-action-btn" onclick="navigate('rostering');openModal('createShift')">${svg('ic-rostering',16)} Create Shift</button>
+          <button class="quick-action-btn" onclick="navigate('timesheets')">${svg('ic-clock',16)} Review Timesheets</button>
+          <button class="quick-action-btn" onclick="navigate('billing');openModal('createInvoice')">${svg('ic-dollar',16)} Generate Invoice</button>
+        </div>
+      </div>
+      <div class="recent-activity-card"><div class="chart-title">Recent Activity</div>
+        ${[{t:'Shift approved',s:'Morning shift for Emma Watson',time:'5 minutes ago'},{t:'Client added',s:'Robert Chen – NDIS Participant',time:'1 hour ago'},{t:'Invoice sent',s:'INV-2024-0152 – $3,240.00',time:'2 hours ago'},{t:'Worker onboarded',s:'Jessica Martinez joined your team',time:'Yesterday'}].map(a=>`
+        <div class="activity-item"><div class="activity-dot">${svg('ic-activity',14)}</div><div class="activity-content"><div class="activity-title">${a.t}</div><div class="activity-sub">${a.s}</div></div><div class="activity-time">${a.time}</div></div>`).join('')}
+      </div>
+    </div>
+  `);
+}
+
+// ==================== CLIENTS ====================
+function clientsPage(){
+  return appLayout('clients','Clients',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Clients</h1><p>Manage your participants and care recipients</p></div>
+      <button class="btn btn-primary" onclick="openModal('addClient')">${svg('ic-plus',16)} Add Client</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-search-bar">
+        <div class="search-input">${svg('ic-search',16)}<input type="text" placeholder="Search clients..."></div>
+        <select class="form-control" style="width:160px">
+          <option>All Clients</option><option>Active</option><option>Paused</option>
+        </select>
+      </div>
+      <table>
+        <thead><tr><th>Client</th><th>Status</th><th>Type</th><th>Care Plan</th><th>Workers</th><th>Budget</th><th>Last Visit</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${clients.map((c,i)=>`<tr>
+            <td><div style="font-weight:500">${c.name}</div><div style="font-size:12px;color:var(--gray-400)">ID: ${c.id}</div></td>
+            <td><span class="badge badge-${c.status}">${c.status}</span></td>
+            <td>${c.type}</td><td style="color:var(--gray-500)">${c.plan}</td><td>${c.workers}</td>
+            <td><div style="font-weight:500">$${c.budget.toLocaleString()}</div><div style="font-size:12px;color:var(--gray-400)">$${c.spent.toLocaleString()} spent</div></td>
+            <td class="td-gray">${c.lastVisit}</td>
+            <td><div class="dropdown"><button class="btn-icon" onclick="toggleClientMenu(${i})">•••</button>
+              ${state.modal==='clientMenu'+i?`<div class="dropdown-menu">
+                <div class="dropdown-item" onclick="viewClient(${i})">${svg('ic-eye',14)} View Profile</div>
+                <div class="dropdown-item">${svg('ic-edit',14)} Edit Details</div>
+                <div class="dropdown-item danger">${svg('ic-trash',14)} Delete Client</div>
+              </div>`:''}
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${state.modal==='addClient'?getModal():''}
+  `);
+}
+function toggleClientMenu(i){state.modal=state.modal==='clientMenu'+i?null:'clientMenu'+i;render();}
+function viewClient(i){state.selectedClient=clients[i];state.modal=null;render();}
+
+function clientProfilePage(){
+  const c=state.selectedClient;
+  return appLayout('clients','Clients',`
+    <div class="flex items-center justify-between" style="margin-bottom:20px">
+      <div>
+        <div class="back-btn" onclick="state.selectedClient=null;render()">${svg('ic-arrow-left',14)} Back</div>
+        <h1 style="font-size:22px;font-weight:700">${c.name}</h1>
+        <div style="font-size:13px;color:var(--gray-500)">${c.type} Participant • ${c.id}</div>
+      </div>
+      <div class="flex gap-2 items-center">
+        <span class="badge badge-active">Active</span>
+        <button class="btn btn-primary">Edit Profile</button>
+      </div>
+    </div>
+    <div class="client-profile-stats">
+      <div class="cp-stat"><div class="cp-icon">${svg('ic-workforce',18)}</div><div><div class="cp-label">Assigned Workers</div><div class="cp-val">${c.workers} workers</div></div></div>
+      <div class="cp-stat"><div class="cp-icon">${svg('ic-rostering',18)}</div><div><div class="cp-label">Next Visit</div><div class="cp-val">Tomorrow 10:00 AM</div></div></div>
+      <div class="cp-stat"><div class="cp-icon">${svg('ic-dollar',18)}</div><div><div class="cp-label">Budget Remaining</div><div class="cp-val">$${(c.budget-c.spent).toLocaleString()}</div></div></div>
+      <div class="cp-stat"><div class="cp-icon">${svg('ic-file',18)}</div><div><div class="cp-label">Active Plan</div><div class="cp-val">${c.plan.substring(0,12)}</div></div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab-item active">Overview</div>
+      <div class="tab-item">Schedule</div>
+      <div class="tab-item">Notes & Documents</div>
+      <div class="tab-item">Billing History</div>
+    </div>
+    <div class="info-card">
+      <h3>Personal Information</h3>
+      <div class="info-grid">
+        <div class="info-field"><label>Email</label><span>${c.name.toLowerCase().replace(' ','.')}@email.com</span></div>
+        <div class="info-field"><label>Phone</label><span>+61 400 123 456</span></div>
+        <div class="info-field"><label>Date of Birth</label><span>15 April 1990</span></div>
+        <div class="info-field"><label>Address</label><span>123 Main St, Sydney NSW 2000</span></div>
+        <div class="info-field"><label>Emergency Contact</label><span>John Watson (Father)</span></div>
+        <div class="info-field"><label>Emergency Phone</label><span>+61 400 987 654</span></div>
+      </div>
+    </div>
+  `);
+}
+
+// ==================== WORKFORCE ====================
+function workforcePage(){
+  return appLayout('workforce','Workforce',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Workforce</h1><p>Manage your staff and support workers</p></div>
+      <button class="btn btn-primary" onclick="openModal('addWorker')">${svg('ic-plus',16)} Add Worker</button>
+    </div>
+    <div class="table-wrap" style="padding:12px;background:transparent;border:none">
+      <div style="background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px">
+        <div class="search-input" style="max-width:400px">${svg('ic-search',16)}<input type="text" placeholder="Search workers..."></div>
+      </div>
+    </div>
+    <div class="workers-grid">
+      ${workers.map((w,i)=>`
+      <div class="worker-card">
+        <div class="worker-header">
+          <div><div class="worker-name">${w.name}</div><span class="badge badge-${w.status}">${w.status}</span></div>
+          <div style="text-align:right"><div class="rating-val">${w.rating}</div><div class="worker-rating">Rating</div></div>
+        </div>
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:6px">Skills & Certifications</div>
+        <div class="skills-row">${w.skills.map(s=>`<span class="tag">${svg('ic-check-circle',12)} ${s}</span>`).join('')}</div>
+        <div class="worker-meta"><span>Shifts this month: <strong>${w.shifts}</strong></span></div>
+        <div class="worker-actions">
+          <button class="btn btn-secondary btn-sm" onclick="viewWorker(${i})">View Profile</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('assignShift')">Assign Shift</button>
+        </div>
+      </div>`).join('')}
+    </div>
+    ${state.modal?getModal():''}
+  `);
+}
+function viewWorker(i){state.selectedWorker=workers[i];state.modal=null;render();}
+
+function workerProfilePage(){
+  const w=state.selectedWorker;
+  return appLayout('workforce','Workforce',`
+    <div class="flex items-center justify-between" style="margin-bottom:20px">
+      <div>
+        <div class="back-btn" onclick="state.selectedWorker=null;render()">${svg('ic-arrow-left',14)} Back</div>
+        <h1 style="font-size:22px;font-weight:700">${w.name}</h1>
+        <div style="font-size:13px;color:var(--gray-500)">Support Worker • ${w.id}</div>
+      </div>
+      <div class="flex gap-2 items-center">
+        <span class="badge badge-available">available</span>
+        <button class="btn btn-primary" onclick="openModal('assignShift')">Assign Shift</button>
+      </div>
+    </div>
+    <div class="worker-profile-stats">
+      <div class="worker-stat-card"><div class="ws-icon">${svg('ic-star',18)}</div><div><div class="ws-val">${w.rating}</div><div class="ws-label">Rating</div></div></div>
+      <div class="worker-stat-card"><div class="ws-icon">${svg('ic-rostering',18)}</div><div><div class="ws-val">4</div><div class="ws-label">Upcoming Shifts</div></div></div>
+      <div class="worker-stat-card"><div class="ws-icon">${svg('ic-clock',18)}</div><div><div class="ws-val">${w.shifts}</div><div class="ws-label">This Month</div></div></div>
+      <div class="worker-stat-card"><div class="ws-icon">${svg('ic-check-circle',18)}</div><div><div class="ws-val">3</div><div class="ws-label">Certifications</div></div></div>
+    </div>
+    <div class="tabs"><div class="tab-item active">Overview</div><div class="tab-item">Shifts</div><div class="tab-item">Certifications Availability</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="info-card">
+        <h3>Contact Information</h3>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="flex items-center gap-2">${svg('ic-mail',14)}<span style="font-size:13px">sarah.johnson@example.com</span></div>
+          <div class="flex items-center gap-2">${svg('ic-phone',14)}<span style="font-size:13px">+61 412 345 678</span></div>
+          <div class="flex items-center gap-2">${svg('ic-map-pin',14)}<span style="font-size:13px">123 Care Street, Sydney NSW 2000</span></div>
+          <div class="flex items-center gap-2">${svg('ic-rostering',14)}<span style="font-size:13px">Joined 15 January 2023</span></div>
+        </div>
+      </div>
+      <div class="info-card">
+        <h3>Skills & Qualifications</h3>
+        <div class="skills-row">${w.skills.map(s=>`<span class="tag">${svg('ic-check-circle',12)} ${s}</span>`).join('')}</div>
+      </div>
+    </div>
+    <div class="info-card" style="margin-top:16px">
+      <h3>Recent Progress Notes</h3>
+      ${[{client:'Emma Watson',date:'2025-12-20',note:'Client was in good spirits. Assisted with personal care and medication.'},{client:'Margaret Smith',date:'2025-12-18',note:'Completed all daily activities. No issues to report.'}].map(n=>`
+      <div style="border-left:3px solid var(--primary);padding:8px 14px;margin-bottom:12px">
+        <div class="flex justify-between"><div class="flex items-center gap-6">${svg('ic-file',14)}<strong style="font-size:13px">${n.client}</strong></div><span style="font-size:12px;color:var(--gray-400)">${n.date}</span></div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:4px">${n.note}</div>
+      </div>`).join('')}
+    </div>
+    ${state.modal?getModal():''}
+  `);
+}
+
+// ==================== ROSTERING ====================
+function rosteringPage(){
+  const days=[{name:'Mon',num:23},{name:'Tue',num:24},{name:'Wed',num:25},{name:'Thu',num:26},{name:'Fri',num:27},{name:'Sat',num:28},{name:'Sun',num:29}];
+  const shifts={23:[{t:'08:00-12:00',c:'Emma Watson',w:'Sarah Johnson',col:'teal'}],24:[{t:'08:00-12:00',c:'Emma Watson',w:'Emma Wo..',col:'teal'},{t:'10:00-14:00',c:'Robert Chen',w:'Unassigned',col:'pink'}],25:[{t:'08:00-12:00',c:'Emma Watson',w:'Sarah Johnson',col:'teal'},{t:'10:00-14:00',c:'Robert Chen',w:'Unassigned',col:'pink'},{t:'14:00-18:00',c:'Margaret Smith',w:'Michael Brown',col:'light-teal'}],26:[{t:'08:00-12:00',c:'Emma Watson',w:'Sarah Johnson',col:'teal'},{t:'10:00-14:00',c:'Robert Chen',w:'Unassigned',col:'pink'},{t:'14:00-18:00',c:'Margaret Smith',w:'Michael Brown',col:'light-teal'},{t:'16:00-20:00',c:'Emma Watson',w:'Jessica Martinez',col:'teal'}],27:[],28:[],29:[]};
+  return appLayout('rostering','Rostering',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Rostering</h1><p>Manage shifts and schedules</p></div>
+      <button class="btn btn-primary" onclick="openModal('createShift')">${svg('ic-plus',16)} Create Shift</button>
+    </div>
+    <div class="roster-week">
+      <div class="roster-header">
+        <button class="btn-icon" style="border:none">${svg('ic-arrow-left',16)}</button>
+        <div class="week-label">${svg('ic-rostering',16)} Week of December 25, 2025</div>
+        <button class="btn-icon" style="border:none">${svg('ic-arrow-right',16)}</button>
+      </div>
+      <div class="week-grid">
+        ${days.map(d=>`<div class="day-col">
+          <div class="day-header"><div class="day-name">${d.name}</div><div class="day-num">${d.num}</div></div>
+          ${(shifts[d.num]||[]).map(s=>`<div class="shift-block ${s.col}"><div class="shift-time">${s.t}</div><div class="shift-client">${s.c}</div><div class="shift-worker">${s.w}</div></div>`).join('')}
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="roster-bottom">
+      <div class="roster-section"><h3>Open Shifts</h3>
+        <div class="open-shift-item"><div><div style="font-weight:500">Robert Chen</div><div style="font-size:12px;color:var(--gray-400)">10:00-14:00</div></div><button class="btn btn-primary btn-sm">Assign</button></div>
+      </div>
+      <div class="roster-section"><h3>Today's Shifts</h3>
+        ${[{c:'Emma Watson',w:'Sarah Johnson',t:'08:00-12:00'},{c:'Margaret Smith',w:'Michael Brown',t:'14:00-18:00'},{c:'Emma Watson',w:'Jessica Martinez',t:'16:00-20:00'}].map(s=>`
+        <div class="confirmed-item"><div><div style="font-weight:500">${s.c}</div><div style="font-size:12px;color:var(--gray-400)">${s.w} • ${s.t}</div></div><span class="badge badge-active" style="background:transparent;color:var(--gray-500);border:1px solid var(--gray-200)">Confirmed</span></div>`).join('')}
+      </div>
+    </div>
+    ${state.modal?getModal():''}
+  `);
+}
+
+// ==================== TIMESHEETS ====================
+function timesheetsPage(){
+  return appLayout('timesheets','Timesheets',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Timesheets</h1><p>Review and approve worker timesheets</p></div>
+      <div class="ts-header-right">${svg('ic-clock',14)} 2 Pending</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Worker</th><th>Client</th><th>Date</th><th>Time</th><th>Hours</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${timesheets.map((t,i)=>`<tr>
+            <td style="font-weight:500">${t.worker}</td>
+            <td>${t.client}</td>
+            <td class="td-gray">${t.date}</td>
+            <td>${t.start} - ${t.end}</td>
+            <td>${t.hours}h</td>
+            <td><span class="badge badge-${t.status}">${t.status}</span></td>
+            <td><div class="inv-actions">
+              ${t.status==='pending'?`
+              <button class="btn-icon" onclick="openModal('approveTs',${i})" title="Approve" style="color:var(--green)">${svg('ic-check-circle',18)}</button>
+              <button class="btn-icon" onclick="openModal('rejectTs',${i})" title="Reject" style="color:var(--red)">${svg('ic-x',18)}</button>
+              `:''}
+              <button class="btn-icon" onclick="openModal('viewTs',${i})">${svg('ic-eye',16)}</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${state.modal?getModal():''}
+  `);
+}
+
+// ==================== LIVE TRACKING ====================
+function liveTrackingPage(){
+  const activeWorkers=[
+    {init:'SJ',name:'Sarah Johnson',client:'Emma Watson',speed:'0 km/h',color:'#10B981',status:'active'},
+    {init:'MB',name:'Michael Brown',client:'Robert Chen',speed:'1 km/h',color:'#F59E0B',status:'break'},
+    {init:'JM',name:'Jessica Martinez',client:'Margaret Smith',speed:'1 km/h',color:'#10B981',status:'active'},
+    {init:'DL',name:'David Lee',client:'John Davis',speed:'5 km/h',color:'#3B82F6',status:'en-route'},
+    {init:'EW',name:'Emily Wilson',client:'Alice Brown',speed:'0 km/h',color:'#10B981',status:'active'},
+    {init:'JA',name:'James Anderson',client:'Tom White',speed:'1 km/h',color:'#10B981',status:'active'},
+  ];
+  return appLayout('live-tracking','Live Wrorker Tracking',`
+    <div class="page-header" style="margin-bottom:16px">
+      <div class="page-header-left"><h1>Live Worker Tracking</h1><p>Real-time location tracking for active shifts</p></div>
+      <div class="flex gap-2">
+        <button class="btn btn-secondary btn-sm">${svg('ic-geofence',14)} Geofences</button>
+        <button class="btn btn-secondary btn-sm">${svg('ic-path',14)} Paths</button>
+        <button class="btn btn-primary btn-sm">${svg('ic-map',14)} Map View</button>
+        <button class="btn btn-secondary btn-sm">${svg('ic-list',14)} List View</button>
+      </div>
+    </div>
+    <div class="table-search-bar" style="background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:16px;padding:10px 14px">
+      <div class="search-input">${svg('ic-search',16)}<input type="text" placeholder="Search workers or clients..."></div>
+      <select class="form-control" style="width:160px"><option>All Status</option></select>
+      <div class="flex items-center gap-2" style="margin-left:auto;color:var(--primary);">${svg('ic-activity',16)} <span style="font-size:13px;font-weight:500">6 workers tracked</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:0;border:1px solid var(--gray-200);border-radius:var(--radius);overflow:hidden">
+      <div id="liveMap" style="height:520px"></div>
+      <div style="background:var(--white);border-left:1px solid var(--gray-200);padding:16px;overflow-y:auto;height:520px">
+        <div class="tracking-sidebar-title">Active Workers</div>
+        ${activeWorkers.map((w,i)=>`
+        <div class="worker-track-item" onclick="showWorkerDetail(${i},'live')">
+          <div class="wt-avatar">${w.init}<div class="wt-status-dot" style="background:${w.color}"></div></div>
+          <div class="flex-1"><div class="wt-name">${w.name}</div><div class="wt-client">${w.client}</div></div>
+          <div class="wt-speed">${w.speed}</div>
+        </div>`).join('')}
+        <div class="track-stats">
+          <div class="tracking-sidebar-title">Tracking Stats</div>
+          <div class="track-stat-row"><span class="track-stat-label">Active Workers</span><span class="track-stat-val" style="color:var(--primary)">3</span></div>
+          <div class="track-stat-row"><span class="track-stat-label">On Break</span><span class="track-stat-val" style="color:var(--yellow)">1</span></div>
+          <div class="track-stat-row"><span class="track-stat-label">En Route</span><span class="track-stat-val" style="color:#3B82F6">1</span></div>
+          <div class="track-stat-row"><span class="track-stat-label">Offline</span><span class="track-stat-val">1</span></div>
+        </div>
+        ${state.selectedWorkerTrack!==null?`
+        <div class="worker-detail-card" style="margin-top:16px;border-top:1px solid var(--gray-200);padding-top:14px">
+          <div class="tracking-sidebar-title">Worker Details</div>
+          <div class="flex items-center gap-10 mb-2">
+            <div class="wt-avatar" style="width:42px;height:42px;font-size:14px">${activeWorkers[state.selectedWorkerTrack].init}<div class="wt-status-dot" style="background:${activeWorkers[state.selectedWorkerTrack].color}"></div></div>
+            <div><div class="wd-name">${activeWorkers[state.selectedWorkerTrack].name}</div><span class="badge badge-active">Active</span></div>
+          </div>
+          <div class="wd-field"><label>Client</label><span>Emma Watson</span></div>
+          <div class="wd-field"><label>Shift Time</label><span>8:00 AM – 6:00 PM</span></div>
+          <div class="wd-field"><label>Location</label><span>Bridge Street, Paddington</span></div>
+          <div class="wd-field"><label>Distance</label><span>180 km</span></div>
+          <div class="wd-field"><label>Last Update</label><span>Just now</span></div>
+          <div class="wd-actions">
+            <button class="btn btn-primary">${svg('ic-call',14)} Call Worker</button>
+            <button class="btn btn-secondary">${svg('ic-map-pin',14)} View Full History</button>
+          </div>
+        </div>`:''}
+      </div>
+    </div>
+    ${state.modal?getModal():''}
+  `);
+}
+
+function showWorkerDetail(i,view){state.selectedWorkerTrack=i;render();}
+
+// ==================== TRACKING HISTORY ====================
+function trackingHistoryPage(){
+  return appLayout('tracking-history','Tracking History',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Tracking History</h1><p>View historical location data and shift trails</p></div>
+      <button class="btn btn-primary btn-sm">${svg('ic-download',14)} Export Report</button>
+    </div>
+    <div class="th-filters">
+      <div class="th-filters-grid">
+        <div><label class="form-label">Worker</label><select class="form-control"><option>All Workers</option></select></div>
+        <div><label class="form-label">Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input type="text" class="form-control" value="February 1st, 2026" style="padding-left:34px"></div></div>
+        <div><label class="form-label">Shift</label><select class="form-control"><option>All Shifts</option></select></div>
+        <div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+        <div><label class="form-label">Status</label><select class="form-control"><option>All Statuses</option></select></div>
+        <div><label class="form-label">Search</label><input class="form-control" placeholder="Search by worker or client"></div>
+      </div>
+    </div>
+    <div class="th-main">
+      <div>
+        <div id="historyMap" style="height:440px;border-radius:var(--radius);border:1px solid var(--gray-200)"></div>
+        <div class="trip-summary" style="margin-top:16px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:12px">Trip Summary</div>
+          <div class="trip-stats">
+            <div class="trip-stat"><div class="trip-stat-val">4.2 km</div><div class="trip-stat-label">Total Distance</div></div>
+            <div class="trip-stat" style="border-left:1px solid var(--gray-100)"><div class="trip-stat-val">8h 0m</div><div class="trip-stat-label">Duration</div></div>
+            <div class="trip-stat" style="border-left:1px solid var(--gray-100)"><div class="trip-stat-val">4</div><div class="trip-stat-label">Checkpoints</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="th-shift-details">
+        <div class="th-section-title">Shift Details</div>
+        <div class="flex items-center gap-10 mb-3">
+          <div class="wt-avatar" style="width:42px;height:42px">SJ</div>
+          <div><div style="font-weight:600">Sarah Johnson</div><div style="font-size:12px;color:var(--gray-400)">Jan 28, 2025</div></div>
+        </div>
+        <div class="wd-field"><label>Client</label><span>Emma Watson</span></div>
+        <div class="wd-field"><label>Shift Time</label><span>8:00 AM - 4:00 PM</span></div>
+        <div class="wd-field"><label>Distance</label><span>4.2 km</span></div>
+        <div style="height:1px;background:var(--gray-200);margin:14px 0"></div>
+        <div class="th-section-title">Checkpoints</div>
+        ${[{label:'Shift Start',time:'8:00 AM',coord:'-33.8688, 151.2093',dot:'green'},{label:'Break',time:'10:30 AM',coord:'-33.8675, 151.2110',dot:'teal'},{label:'Lunch Break',time:'12:00 PM',coord:'-33.8662, 151.2128',dot:'teal'},{label:'Shift End',time:'4:00 PM',coord:'-33.8650, 151.2150',dot:'red'}].map(cp=>`
+        <div class="checkpoint-item">
+          <div class="checkpoint-dot ${cp.dot}"></div>
+          <div><div class="checkpoint-label">${cp.label}</div><div class="checkpoint-time">${cp.time}</div><div class="checkpoint-coord">${svg('ic-map-pin',11)} ${cp.coord}</div></div>
+        </div>`).join('')}
+        <div style="height:1px;background:var(--gray-200);margin:14px 0"></div>
+        <div class="th-section-title">Recent History</div>
+        <div style="font-size:13px;color:var(--gray-400)">More entries available</div>
+      </div>
+    </div>
+  `);
+}
+
+// ==================== BILLING ====================
+function billingPage(){
+  return appLayout('billing','Billing',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Billing & Invoicing</h1><p>Manage invoices and payments</p></div>
+      <button class="btn btn-primary" onclick="openModal('createInvoice')">${svg('ic-plus',16)} Generate Invoice</button>
+    </div>
+    <div class="billing-stats">
+      <div class="billing-stat"><div class="billing-stat-icon" style="background:#FEF3C7;color:#D97706">${svg('ic-dollar',20)}</div><div><div class="billing-stat-label">Outstanding</div><div class="billing-stat-val">$1460.00</div></div></div>
+      <div class="billing-stat"><div class="billing-stat-icon" style="background:#D1FAE5;color:#059669">${svg('ic-file',20)}</div><div><div class="billing-stat-label">Paid This Month</div><div class="billing-stat-val">$2800.00</div></div></div>
+      <div class="billing-stat"><div class="billing-stat-icon" style="background:#FEE2E2;color:#DC2626">${svg('ic-file',20)}</div><div><div class="billing-stat-label">Overdue</div><div class="billing-stat-val">$640.00</div></div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-search-bar">
+        <div class="search-input">${svg('ic-search',16)}<input type="text" placeholder="Search invoices..."></div>
+        <div class="flex items-center gap-2">${svg('ic-filter',14)} <select class="form-control" style="width:140px"><option>All Statuses</option></select></div>
+      </div>
+      <table>
+        <thead><tr><th>Invoice #</th><th>Client</th><th>Amount</th><th>Invoice Date</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${invoices.map((inv,i)=>`<tr>
+            <td style="font-weight:500">${inv.id}</td>
+            <td>${inv.client}</td>
+            <td>$${inv.amount.toFixed(2)}</td>
+            <td class="td-gray">${inv.date}</td>
+            <td class="td-gray">${inv.due}</td>
+            <td><span class="badge badge-${inv.status}">${inv.status}</span></td>
+            <td><div class="inv-actions">
+              <button class="btn-icon" onclick="openModal('viewInvoice',${i})">${svg('ic-eye',16)}</button>
+              ${inv.status==='pending'?`<button class="btn-icon" onclick="openModal('recordPayment',${i})">${svg('ic-dollar',16)}</button><button class="btn-icon" onclick="openModal('sendInvoice',${i})">${svg('ic-send',16)}</button>`:''}
+              <button class="btn-icon">${svg('ic-download',16)}</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="integration-section">
+      <h3>Integrations</h3>
+      <div class="integrations-grid">
+        <div class="int-card"><div><div class="int-name">Xero</div><div class="int-desc" style="color:var(--gray-400)">Last synced: 2 hours ago</div></div><span class="connected-badge">Connected</span></div>
+        <div class="int-card"><div><div class="int-name">QuickBooks</div><div class="int-desc" style="color:var(--gray-400)">Not connected</div></div><button class="btn btn-ghost btn-sm">Connect</button></div>
+      </div>
+    </div>
+    ${state.modal?getModal():''}
+  `);
+}
+
+// ==================== REPORTS ====================
+function reportsPage(){
+  return appLayout('reports','Reports',`
+    <div class="page-header">
+      <div class="page-header-left"><h1>Reports & Analytics</h1><p>Generate insights and export data</p></div>
+      <button class="btn btn-primary" onclick="openModal('customReport')">${svg('ic-plus',16)} Custom Report</button>
+    </div>
+    <div class="reports-grid">
+      ${reports.map((r,i)=>`
+      <div class="report-card">
+        <div class="report-card-header">
+          <div class="flex items-center gap-10">
+            <div class="report-icon" style="background:${r.iconBg};color:${r.iconColor}">${svg(r.icon,18)}</div>
+            <div><div class="report-title">${r.title}</div><div class="report-desc">${r.desc}</div></div>
+          </div>
+          <span class="badge badge-${r.status}">${r.status}</span>
+        </div>
+        <div class="report-stats">
+          ${r.stats.map(s=>`<div class="rs-item"><label>${s.l}</label><span>${s.v} <span class="rs-change ${s.up?'up':'down'}">${s.c}</span></span></div>`).join('')}
+        </div>
+        <div class="report-footer">
+          <span class="report-last">Last run: ${r.lastRun}</span>
+          <div class="report-actions">
+            <button class="report-action-btn" onclick="openModal('viewReport',${i})" title="View">${svg('ic-eye',16)}</button>
+            <button class="report-action-btn" onclick="openModal('runReport',${i})" title="Run">${svg('ic-arrow-right',16)}</button>
+            <button class="report-action-btn" onclick="openModal('scheduleReport',${i})" title="Schedule">${svg('ic-rostering',16)}</button>
+            <button class="report-action-btn" onclick="openModal('exportReport',${i})" title="Download">${svg('ic-download',16)}</button>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+    ${state.modal?getModal():''}
+  `);
+}
+
+// ==================== SETTINGS ====================
+function settingsPage(){
+  const tabs=['organization','notifications','integrations','security','data'];
+  return appLayout('settings','Settings',`
+    <div class="page-header"><div class="page-header-left"><h1>Settings</h1><p>Manage your organization settings and preferences</p></div></div>
+    <div class="settings-tabs">
+      ${[{id:'organization',label:'Organization',icon:'ic-org'},{id:'notifications',label:'Notifications',icon:'ic-bell'},{id:'integrations',label:'Integrations',icon:'ic-link'},{id:'security',label:'Security',icon:'ic-shield'},{id:'data',label:'Data',icon:'ic-database'}].map(t=>`
+      <div class="settings-tab${state.settingsTab===t.id?' active':''}" onclick="state.settingsTab='${t.id}';render()">${svg(t.icon,14)} ${t.label}</div>`).join('')}
+    </div>
+    ${getSettingsContent()}
+    ${state.modal?getModal():''}
+  `);
+}
+
+function getSettingsContent(){
+  if(state.settingsTab==='organization') return `
+    <div class="settings-section">
+      <h3>Organization Details</h3>
+      <div class="org-form-grid">
+        <div class="field-group"><label class="form-label">Organization Name</label><input class="form-control" value="Acme Care Services"></div>
+        <div class="field-group"><label class="form-label">ABN</label><input class="form-control" value="12 345 678 901"></div>
+        <div class="field-group"><label class="form-label">Phone</label><input class="form-control" value="+61 2 9876 5432"></div>
+        <div class="field-group"><label class="form-label">Email</label><input class="form-control" value="contact@acmecare.com"></div>
+      </div>
+      <div class="field-group"><label class="form-label">Website</label><input class="form-control" value="www.acmecare.com"></div>
+      <div class="field-group"><label class="form-label">Address</label><input class="form-control" value="123 Business St, Sydney NSW 2000"></div>
+      <div class="org-form-grid" style="margin-top:14px">
+        <div class="field-group"><label class="form-label">Timezone</label><select class="form-control"><option>Australia/Sydney</option></select></div>
+        <div class="field-group"><label class="form-label">Currency</label><select class="form-control"><option>AUD - Australian Dollar</option></select></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-primary">Save Changes</button></div>
+    </div>`;
+
+  if(state.settingsTab==='notifications') return `
+    <div class="settings-section">
+      <h3>Notification Preferences</h3>
+      ${[{label:'Shift Reminders',desc:'Get notified before shifts start',on:true},{label:'Late Check-ins',desc:'Alert when workers are late to check in',on:true},{label:'Timesheet Approvals',desc:'Notify when timesheets need approval',on:true},{label:'Invoice Payments',desc:'Alert when invoices are paid',on:false},{label:'Certificate Expiry',desc:'Remind about expiring certifications',on:true}].map(n=>`
+      <div class="setting-row">
+        <div><div class="setting-label">${n.label}</div><div class="setting-desc">${n.desc}</div></div>
+        <div class="toggle${n.on?' on':''}" onclick="this.classList.toggle('on')"></div>
+      </div>`).join('')}
+    </div>`;
+
+  if(state.settingsTab==='integrations') return `
+    <div class="settings-section">
+      <div class="flex justify-between items-center" style="margin-bottom:16px"><h3 style="margin-bottom:0">Available Integrations</h3><span class="badge badge-connected">2 Connected</span></div>
+      ${[{name:'Xero',desc:'Accounting and invoicing',connected:true,extra:'Last synced: 2 hours ago\nAPI Key: xero_**************'},{name:'QuickBooks',desc:'Financial management',connected:false},{name:'Deputy',desc:'Payroll processing',connected:false},{name:'Slack',desc:'Team communication',connected:true,extra:'Last synced: 5 minutes ago\nAPI Key: slack_**************'},{name:'Microsoft Teams',desc:'Collaboration platform',connected:false},{name:'Gmail',desc:'Email integration',connected:false}].map(i=>`
+      <div class="int-row">
+        <div><div class="int-row-name">${i.name}${i.connected?` <span class="connected-badge">${svg('ic-check',12)} Connected</span>`:''}</div><div class="int-row-desc">${i.desc}</div>${i.extra?`<div class="int-row-extra" style="white-space:pre-line">${i.extra}</div>`:''}</div>
+        <div class="int-row-actions">${i.connected?`<button class="btn btn-secondary btn-sm">Sync</button><button class="btn btn-ghost btn-sm">Disconnect</button>`:`<button class="btn btn-primary btn-sm" onclick="openModal('connectInt','${i.name}')">Connect</button>`}</div>
+      </div>`).join('')}
+    </div>`;
+
+  if(state.settingsTab==='security') return `
+    <div class="settings-section">
+      <h3>Authentication & Access</h3>
+      <div class="setting-row"><div><div class="setting-label">Two-Factor Authentication</div><div class="setting-desc">Add an extra layer of security to your account</div></div><div class="toggle on"></div></div>
+      <div class="setting-row"><div class="setting-label">Session Timeout (minutes)</div><select class="form-control" style="width:160px"><option>30 minutes</option><option>60 minutes</option></select></div>
+      <div class="setting-row"><div class="setting-label">Password Expiry (days)</div><select class="form-control" style="width:160px"><option>90 days</option><option>60 days</option></select></div>
+      <div class="setting-row"><div class="setting-label">Max Login Attempts</div><select class="form-control" style="width:160px"><option>5 attempts</option><option>3 attempts</option></select></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn btn-primary">Save Security Settings</button></div>
+    </div>
+    <div class="settings-section">
+      <div class="flex justify-between items-center"><h3 style="margin-bottom:0">Role Management</h3><div class="manage-roles-btn" onclick="openModal('addRole')">${svg('ic-users',14)} Manage All Roles</div></div>
+      <p class="sub">Control access levels for different user roles</p>
+      ${[{name:'Admin',users:3,desc:'Full system access',tags:['all']},{name:'Manager',users:12,desc:'Team and client management',tags:['view clients','edit clients','view staff','+1 more']},{name:'Finance',users:5,desc:'Billing and invoicing',tags:['view invoices','create invoices','view reports']},{name:'Staff',users:156,desc:'Basic access',tags:['view schedule','submit timesheets']}].map(r=>`
+      <div class="role-card">
+        <div><div><span class="role-name">${r.name}</span><span class="role-users">${r.users} users</span></div><div class="role-desc">${r.desc}</div><div class="role-tags">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div></div>
+        <button class="btn btn-secondary btn-sm" onclick="openModal('editRole','${r.name}')">Edit</button>
+      </div>`).join('')}
+    </div>
+    <div class="settings-section">
+      <h3>Audit Logs</h3><p class="sub">View recent system activity and user actions</p>
+      ${auditLogs.map(a=>`
+      <div class="audit-item">
+        <div><div class="audit-user">${a.user} · <span style="font-weight:400">${a.action}</span></div><div class="audit-action">${a.detail}</div></div>
+        <div class="audit-time">${a.time}</div>
+      </div>`).join('')}
+      <div class="view-all-logs">${svg('ic-file',14)} View All Logs</div>
+    </div>`;
+
+  if(state.settingsTab==='data') return `
+    <div class="settings-section">
+      <h3>Data Management</h3>
+      <div class="data-item"><div class="flex items-center gap-10"><div class="data-icon primary">${svg('ic-download',18)}</div><div><div style="font-weight:500">Export Data</div><div style="font-size:12px;color:var(--gray-500)">Download all your organization data in CSV or JSON format</div></div></div><button class="btn btn-secondary btn-sm">${svg('ic-download',14)} Export All Data</button></div>
+      <div class="data-item"><div class="flex items-center gap-10"><div class="data-icon primary">${svg('ic-upload',18)}</div><div><div style="font-weight:500">Import Data</div><div style="font-size:12px;color:var(--gray-500)">Bulk import clients, staff, or other data from CSV files</div></div></div><button class="btn btn-secondary btn-sm">${svg('ic-upload',14)} Import Data</button></div>
+      <div class="data-item danger"><div class="flex items-center gap-10"><div class="data-icon danger">${svg('ic-alert',18)}</div><div><div style="font-weight:500;color:var(--red)">Delete Organization Data</div><div style="font-size:12px;color:var(--gray-500)">Permanently delete all organization data. This action cannot be undone.</div></div></div><button class="btn btn-danger btn-sm">${svg('ic-trash',14)} Delete All Data</button></div>
+    </div>`;
+
+  return '';
+}
+
+// ==================== MODALS ====================
+function openModal(type,data=null){state.modal=type;state.modalData=data;render();}
+function closeModal(){state.modal=null;state.modalData=null;render();}
+
+function getModal(){
+  const type=state.modal;
+  const data=state.modalData;
+  if(!type||type.startsWith('clientMenu'))return'';
+
+  let content='';
+
+  if(type==='addClient'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Add New Client</h2><p>Add a new client to your system</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">First Name</label><input class="form-control" placeholder="First Name"></div><div class="field-group"><label class="form-label">Last Name</label><input class="form-control" placeholder="Last Name"></div></div>
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">Email</label><input class="form-control" placeholder="info@email.com"></div><div class="field-group"><label class="form-label">Phone</label><input class="form-control" placeholder="+92"></div></div>
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">Client Type</label><select class="form-control"><option>NDIS</option><option>Aged Care</option></select></div><div class="field-group"><label class="form-label">NDIS Number (Optional)</label><input class="form-control" placeholder="400123456"></div></div>
+      <div class="field-group"><label class="form-label">Address</label><input class="form-control" placeholder="abc floor, xyz 63400"></div>
+      <div class="field-group"><label class="form-label">Care Plan</label><textarea class="form-control" placeholder="Brief description of care requirements..."></textarea></div>
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">Annual Budget</label><input class="form-control" placeholder="50000"></div><div class="field-group"><label class="form-label">Start Date</label><input class="form-control" type="date"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Add Client</button></div>`;}
+
+  else if(type==='addWorker'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Add New Worker</h2><p>Add a new worker to your team</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">First Name</label><input class="form-control" placeholder="First Name"></div><div class="field-group"><label class="form-label">Last Name</label><input class="form-control" placeholder="Last Name"></div></div>
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">Email</label><input class="form-control" placeholder="info@email.com"></div><div class="field-group"><label class="form-label">Phone</label><input class="form-control" placeholder="+92"></div></div>
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">Position</label><select class="form-control"><option>Support Worker</option><option>Manager</option></select></div><div class="field-group"><label class="form-label">Start Date</label><input class="form-control" type="date"></div></div>
+      <div class="field-group"><label class="form-label">Skills & Certifications (comma-separated)</label><input class="form-control" placeholder="NDIS, Personal Care, First Aid"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Add Worker</button></div>`;}
+
+  else if(type==='assignShift'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Assign Shift to ${state.selectedWorker?state.selectedWorker.name:'Worker'}</h2><p>Select a shift to assign to this worker.</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Client</label><select class="form-control"><option value="">Select client</option>${clients.map(c=>`<option>${c.name}</option>`).join('')}</select></div>
+      <div class="field-group"><label class="form-label">Shift Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input class="form-control" type="date" style="padding-left:34px"></div></div>
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">Start Time</label><input class="form-control" value="09:00 AM"></div><div class="field-group"><label class="form-label">End Time</label><input class="form-control" value="05:00 PM"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Assign Shift</button></div>`;}
+
+  else if(type==='createShift'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Create New Shift</h2><p>Enter the details for the new shift.</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Client</label><select class="form-control"><option value="">Select client</option>${clients.map(c=>`<option>${c.name}</option>`).join('')}</select></div>
+      <div class="field-group"><label class="form-label">Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input class="form-control" type="date" style="padding-left:34px"></div></div>
+      <div class="form-row field-group"><div class="field-group"><label class="form-label">Start Time</label><input class="form-control" value="09:00 AM"></div><div class="field-group"><label class="form-label">End Time</label><input class="form-control" value="05:00 PM"></div></div>
+      <div class="field-group"><label class="form-label">Assign Worker (Optional)</label><select class="form-control"><option value="">Select worker</option>${workers.map(w=>`<option>${w.name}</option>`).join('')}</select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Create Shift</button></div>`;}
+
+  else if(type==='approveTs'){const ts=timesheets[data];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Approve Timesheet</h2></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body"><p style="font-size:14px;color:var(--gray-600)">Are you sure you want to approve the timesheet for ${ts?ts.worker:''}?</p></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" style="color:#fff" onclick="closeModal()">Approve</button></div>`;}
+
+  else if(type==='rejectTs'){const ts=timesheets[data];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Reject Timesheet</h2><p>Please provide a reason for rejecting the timesheet for ${ts?ts.worker:''}.</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body"><div class="field-group"><label class="form-label">Rejection Reason</label><textarea class="form-control" placeholder="Enter rejection reason..." style="min-height:100px"></textarea></div></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-danger" onclick="closeModal()">Reject</button></div>`;}
+
+  else if(type==='viewTs'){const ts=timesheets[data];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Timesheet Details</h2><p>View complete details for this timesheet submission</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:12px"><div><label class="form-label">Worker</label><div style="font-size:14px;font-weight:500">${ts?ts.worker:''}</div></div><div><label class="form-label">Client</label><div style="font-size:14px;font-weight:500">${ts?ts.client:''}</div></div></div>
+      <div class="form-row" style="margin-bottom:12px"><div><label class="form-label">Date</label><div>${ts?ts.date:''}</div></div><div><label class="form-label">Time</label><div>${ts?ts.start+' - '+ts.end:''}</div></div><div><label class="form-label">Total Hours</label><div>${ts?ts.hours+'h':''}</div></div></div>
+      <div style="margin-bottom:12px"><label class="form-label">Status</label><div><span class="badge badge-${ts?ts.status:'pending'}">${ts?ts.status:''}</span></div></div>
+      <div class="field-group"><label class="form-label">Service Notes</label><div class="form-control" style="background:var(--gray-50)">${ts?ts.notes:''}</div></div>
+      <div class="field-group"><label class="form-label">Progress Notes</label><div class="form-control" style="background:var(--gray-50);min-height:80px">${ts?ts.progress:''}</div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" style="color:var(--green);border-color:var(--green)" onclick="closeModal()">${svg('ic-check-circle',16)} Approve</button>
+      <button class="btn btn-secondary" style="color:var(--red);border-color:var(--red)" onclick="closeModal()">${svg('ic-x',16)} Reject</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>`;}
+
+  else if(type==='createInvoice'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Create Invoice</h2><p>Create a new invoice for a client.</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Client</label><select class="form-control"><option value="">Select a client</option>${clients.map(c=>`<option>${c.name}</option>`).join('')}</select></div>
+      <div class="field-group"><label class="form-label">Due Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input class="form-control" type="date" style="padding-left:34px"></div></div>
+      <div class="field-group"><label class="form-label">Notes</label><textarea class="form-control"></textarea></div>
+      <div class="field-group"><label class="form-label">Line Items</label>
+        <div class="flex gap-2 mb-2"><input class="form-control" placeholder="Description" style="flex:2"><input class="form-control" placeholder="0" style="width:70px"><input class="form-control" placeholder="0" style="width:70px"><button class="btn-icon" style="color:var(--red)">${svg('ic-alert',16)}</button></div>
+        <button class="btn btn-secondary btn-sm">Add Line Item</button>
+      </div>
+      <div class="flex justify-between" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--gray-200)"><span class="form-label">Total</span><span style="font-weight:600">$0.00</span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Create Invoice</button></div>`;}
+
+  else if(type==='viewInvoice'){const inv=invoices[data];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Invoice Details</h2><p>View details of the selected invoice.</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Client</label><div style="font-size:14px;font-weight:500">${inv?inv.client:''}</div></div>
+      <div class="field-group"><label class="form-label">Due Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input class="form-control" value="${inv?inv.due:''}" style="padding-left:34px"></div></div>
+      <div class="field-group"><label class="form-label">Notes</label><div class="form-control" style="background:var(--gray-50)">Thank you for your prompt payment.</div></div>
+      <div class="field-group"><label class="form-label">Line Items</label>
+        <div class="flex gap-2 mb-2"><input class="form-control" value="Personal Care Services" style="flex:2;background:var(--gray-50)" readonly><input class="form-control" value="16" style="width:70px;background:var(--gray-50)" readonly><input class="form-control" value="45" style="width:70px;background:var(--gray-50)" readonly></div>
+        <div class="flex gap-2"><input class="form-control" value="Meal Preparation" style="flex:2;background:var(--gray-50)" readonly><input class="form-control" value="8" style="width:70px;background:var(--gray-50)" readonly><input class="form-control" value="40" style="width:70px;background:var(--gray-50)" readonly></div>
+      </div>
+      <div class="field-group"><label class="form-label">Total</label><div style="font-weight:600">$${inv?inv.amount.toFixed(2):''}</div></div>
+      <div class="field-group"><label class="form-label">Status</label><span class="badge badge-${inv?inv.status:'pending'}">${inv?inv.status:''}</span></div>
+      <div class="field-group"><label class="form-label">Payment Method</label><select class="form-control"><option value="">Select a payment method</option><option>Bank Transfer</option><option>Credit Card</option></select></div>
+      <div class="field-group"><label class="form-label">Paid Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input class="form-control" type="date" style="padding-left:34px"></div></div>
+      <div class="field-group"><label class="form-label">Payment Notes</label><textarea class="form-control"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Record Payment</button></div>`;}
+
+  else if(type==='recordPayment'){const inv=invoices[data];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Record Payment</h2><p>Record payment for the selected invoice.</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Client</label><div style="font-size:14px;font-weight:500">${inv?inv.client:''}</div></div>
+      <div class="field-group"><label class="form-label">Due Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input class="form-control" value="${inv?inv.due:''}" style="padding-left:34px"></div></div>
+      <div class="field-group"><label class="form-label">Notes</label><div class="form-control" style="background:var(--gray-50)">Payment due within 7 days.</div></div>
+      <div class="field-group"><label class="form-label">Line Items</label>
+        <div class="flex gap-2 mb-2"><input class="form-control" value="Community Access Support" style="flex:2;background:var(--gray-50)" readonly><input class="form-control" value="12" style="width:70px;background:var(--gray-50)" readonly><input class="form-control" value="50" style="width:70px;background:var(--gray-50)" readonly></div>
+        <div class="flex gap-2"><input class="form-control" value="Transportation" style="flex:2;background:var(--gray-50)" readonly><input class="form-control" value="4" style="width:70px;background:var(--gray-50)" readonly><input class="form-control" value="55" style="width:70px;background:var(--gray-50)" readonly></div>
+      </div>
+      <div class="field-group"><label class="form-label">Total</label><div style="font-weight:600">$820.00</div></div>
+      <div class="field-group"><label class="form-label">Status</label><span class="badge badge-pending">pending</span></div>
+      <div class="field-group"><label class="form-label">Payment Method</label><select class="form-control"><option value="">Select a payment method</option><option>Bank Transfer</option></select></div>
+      <div class="field-group"><label class="form-label">Paid Date</label><div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray-400)">${svg('ic-calendar',14)}</span><input class="form-control" type="date" style="padding-left:34px"></div></div>
+      <div class="field-group"><label class="form-label">Payment Notes</label><textarea class="form-control"></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Record Payment</button></div>`;}
+
+  else if(type==='sendInvoice'){const inv=invoices[data];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Send Invoice</h2><p>Send the selected invoice to the client.</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Client</label><div style="font-size:14px;font-weight:500">${inv?inv.client:''}</div></div>
+      <div class="field-group"><label class="form-label">Due Date</label><input class="form-control" value="${inv?inv.due:''}"></div>
+      <div class="field-group"><label class="form-label">Notes</label><div class="form-control" style="background:var(--gray-50)">Payment due within 7 days.</div></div>
+      <div class="field-group"><label class="form-label">Line Items</label>
+        <div class="flex gap-2 mb-2"><input class="form-control" value="Community Access..." style="flex:2;background:var(--gray-50)" readonly><input class="form-control" value="12" style="width:70px;background:var(--gray-50)" readonly><input class="form-control" value="50" style="width:70px;background:var(--gray-50)" readonly></div>
+        <div class="flex gap-2"><input class="form-control" value="Transportation" style="flex:2;background:var(--gray-50)" readonly><input class="form-control" value="4" style="width:70px;background:var(--gray-50)" readonly><input class="form-control" value="55" style="width:70px;background:var(--gray-50)" readonly></div>
+      </div>
+      <div class="field-group"><label class="form-label">Total</label><div style="font-weight:600">$820.00</div></div>
+      <div class="field-group"><label class="form-label">Status</label><span class="badge badge-pending">pending</span></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">${svg('ic-send',14)} Send Invoice</button></div>`;}
+
+  else if(type==='viewReport'){const r=reports[data];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>${r.title}</h2><p>${r.desc}</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="flex gap-2 mb-3"><span class="tag">${r.id}</span></div>
+      <div style="font-weight:600;margin-bottom:8px;font-size:13px">Summary</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;font-size:13px">
+        <div><div style="color:var(--gray-400)">Total Records</div><div style="font-weight:700">179</div></div>
+        <div><div style="color:var(--gray-400)">Period</div><div style="font-weight:700">Last 30 days</div></div>
+        <div><div style="color:var(--gray-400)">Generated At</div><div style="font-weight:700">1/2/2026, 1:14:27 AM</div></div>
+      </div>
+      <div style="font-weight:600;margin-bottom:8px;font-size:13px">Charts</div>
+      <canvas id="reportMiniChart" height="140"></canvas>
+      <div style="font-weight:600;margin:14px 0 8px;font-size:13px">Details</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:12px">
+        ${[{name:'Sarah Johns',hours:352,util:'96%',rating:4.7},{name:'Michal Nims',hours:142,util:'66%',rating:4.2},{name:'Emilian Jim',hours:117,util:'86%',rating:4.6}].map(w=>`<div><div style="font-weight:500">name <span style="font-weight:700">${w.name}</span></div><div>hours <span style="font-weight:700">${w.hours}</span></div><div>utilization <span style="font-weight:700">${w.util}</span></div><div>rating <span style="font-weight:700">${w.rating}</span></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="closeModal();openModal('exportReport',${data})">${svg('ic-download',14)} Export</button></div>`;}
+
+  else if(type==='scheduleReport'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Schedule Workforce Report</h2><p>Set up a schedule for this report</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Frequency</label><select class="form-control" id="schedFreq" onchange="render()"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+      <div class="field-group" id="schedDayField"><label class="form-label">Day of Week</label><select class="form-control"><option>Friday</option><option>Monday</option><option>Wednesday</option></select></div>
+      <div class="field-group"><label class="form-label">Recipients</label><input class="form-control" placeholder="email@example.com"></div>
+      <div class="field-group"><label class="form-label">Format</label><select class="form-control"><option>PDF</option><option>CSV</option><option>Excel</option></select></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">${svg('ic-rostering',14)} Schedule</button></div>`;}
+
+  else if(type==='exportReport'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Export Workforce Report</h2><p>Choose export options</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Format</label><select class="form-control"><option>PDF</option><option>CSV</option><option>Excel</option></select></div>
+      <div class="setting-row"><div class="setting-label">Include Charts</div><div class="toggle on"></div></div>
+      <div class="setting-row"><div class="setting-label">Include Raw Data</div><div class="toggle on"></div></div>
+      <div class="setting-row"><div class="setting-label">Send Email</div><div class="toggle on"></div></div>
+      <div class="field-group" style="margin-top:14px"><label class="form-label">Email Recipients</label><input class="form-control" placeholder="email@example.com"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">${svg('ic-download',14)} Export</button></div>`;}
+
+  else if(type==='customReport'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Custom Report Builder</h2><p>Build a custom report</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Report Type</label><select class="form-control"><option value="">Select report type</option><option>Workforce</option><option>Financial</option><option>Compliance</option></select></div>
+      <div class="field-group"><label class="form-label">Date Range</label><select class="form-control"><option value="">Select date range</option><option>Last 7 days</option><option>Last 30 days</option><option>Last 90 days</option></select></div>
+      <div class="field-group"><label class="form-label">Format</label><select class="form-control"><option>PDF</option><option>CSV</option></select></div>
+      <div class="setting-row"><div class="setting-label">Include Charts</div><div class="toggle on"></div></div>
+      <div class="setting-row"><div class="setting-label">Include Details</div><div class="toggle on"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">${svg('ic-arrow-right',14)} Generate</button></div>`;}
+
+  else if(type==='addRole'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Add New Role</h2><p>Create a new user role with specific permissions</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">${roleFormContent()}</div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" style="opacity:.5">Create Role</button></div>`;}
+
+  else if(type==='editRole'){const roleName=data||'Manager';const perms=['View Clients','Edit Clients','View Staff','Approve Timesheets'];content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Edit Role</h2><p>Update role details and permissions</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">Role Name</label><input class="form-control" value="${roleName}"></div>
+      <div class="field-group"><label class="form-label">Description</label><input class="form-control" placeholder="Enter role description"></div>
+      ${permissionsListHTML(perms)}
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Save Changes</button></div>`;}
+
+  else if(type==='deleteRole'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Delete Role</h2></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--gray-600);margin-bottom:14px">Are you sure you want to delete this role? This action cannot be undone.</p>
+      <div style="background:#FEF2F2;border:1px solid #FEE2E2;border-radius:var(--radius);padding:14px;font-size:13px"><strong>Deleting the role Staff will affect 156 users.</strong><br>All users with this role will lose their associated permissions.</div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-danger">Delete Role</button></div>`;}
+
+  else if(type==='auditLogs'){content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Audit Logs</h2><p>Complete history of system activity and user actions</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      ${auditLogs.map(a=>`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:12px;border:1px solid var(--gray-100);border-radius:var(--radius);margin-bottom:8px">
+        <div>${svg('ic-alert',14)} <strong>${a.user}</strong> · ${a.action}<br><span style="font-size:12px;color:var(--gray-400)">${a.detail}</span></div>
+        <div style="font-size:12px;color:var(--gray-400);white-space:nowrap;margin-left:12px">${a.time}</div>
+      </div>`).join('')}
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Close</button><button class="btn btn-primary">${svg('ic-download',14)} Export Logs</button></div>`;}
+
+  else if(type==='connectInt'){const intName=data;content=`
+    <div class="modal-header"><div class="modal-header-left"><h2>Connect ${intName}</h2><p>Enter your API credentials to connect ${intName}</p></div><button class="modal-close" onclick="closeModal()">${svg('ic-x',16)}</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="form-label">API Key</label><input class="form-control" placeholder="Enter API Key"></div>
+      <div class="field-group"><label class="form-label">API Secret (Optional)</label><input class="form-control" placeholder="Enter API Secret"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary">Connect</button></div>`;}
+
+  else return '';
+
+  return `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal${type==='addRole'||type==='editRole'?'':''}">${content}</div></div>`;
+}
+
+function permissionsListHTML(checked=[]){
+  const perms=[{label:'View Clients',desc:'View client profiles and information'},{label:'Edit Clients',desc:'Create and modify client records'},{label:'Delete Clients',desc:'Remove client records from system'},{label:'View Staff',desc:'View staff profiles and schedules'},{label:'Edit Staff',desc:'Create and modify staff records'},{label:'Delete Staff',desc:'Remove staff records from system'},{label:'View Schedule',desc:'View shift schedules and rosters'},{label:'Edit Schedule',desc:'Create and modify shifts'},{label:'Approve Timesheets',desc:'Review and approve timesheet submissions'},{label:'Submit Timesheets',desc:'Submit own timesheets for approval'},{label:'View Invoices',desc:'View billing and invoices'},{label:'Create Invoices',desc:'Generate and send invoices'},{label:'Edit Invoices',desc:'Modify invoice details'},{label:'View Reports',desc:'Access analytics and reports'},{label:'Export Reports',desc:'Download and export report data'},{label:'Manage Settings',desc:'Configure system settings'}];
+  return `<div class="field-group"><label class="form-label">Permissions (${checked.length} selected)</label>
+    <div style="max-height:300px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px">
+      ${perms.map(p=>`<div class="permission-item">
+        <input type="checkbox" ${checked.some(c=>c===p.label)?'checked':''}> ${svg('ic-lock',14)}
+        <div><div class="perm-label">${p.label}</div><div class="perm-desc">${p.desc}</div></div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function roleFormContent(){
+  return `<div class="field-group"><label class="form-label">Role Name</label><input class="form-control" placeholder="Enter role name (e.g., Support Staff, Care Coordinator)"></div>
+    <div class="field-group"><label class="form-label">Description</label><textarea class="form-control" placeholder="Enter a brief description of what this role can do"></textarea></div>
+    ${permissionsListHTML()}`;
+}
+
+// ==================== POST RENDER ====================
+function postRender(){
+  // Charts
+  if(document.getElementById('revenueChart'))drawRevenueChart();
+  if(document.getElementById('shiftsChart'))drawShiftsChart();
+  if(document.getElementById('reportMiniChart'))drawReportMiniChart();
+  // Maps
+  if(document.getElementById('liveMap')&&!state._liveMapInit)initLiveMap();
+  if(document.getElementById('historyMap')&&!state._histMapInit)initHistoryMap();
+}
+
+function drawRevenueChart(){
+  const ctx=document.getElementById('revenueChart').getContext('2d');
+  new Chart(ctx,{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{data:[42000,46000,44000,61000,58000,67000],borderColor:'#0D9488',backgroundColor:'rgba(13,148,136,0.08)',tension:0.4,fill:true,pointBackgroundColor:'#0D9488',pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:false,min:20000,ticks:{callback:v=>v.toLocaleString()},grid:{color:'#F3F4F6'}},x:{grid:{display:false}}}}});
+}
+function drawShiftsChart(){
+  const ctx=document.getElementById('shiftsChart').getContext('2d');
+  new Chart(ctx,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{data:[45,48,46,58,47,38,32],backgroundColor:'#0D9488',borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:70,grid:{color:'#F3F4F6'}},x:{grid:{display:false}}}}});
+}
+function drawReportMiniChart(){
+  const ctx=document.getElementById('reportMiniChart').getContext('2d');
+  new Chart(ctx,{type:'bar',data:{labels:['Jan','Feb','Mar','Apr','May'],datasets:[{label:'hours',data:[2300,2100,2350,2500,2900],backgroundColor:'#0D9488',borderRadius:3},{label:'staff',data:[80,75,82,90,100],backgroundColor:'#99F6E4',borderRadius:3}]},options:{responsive:true,plugins:{legend:{display:true,position:'bottom'}},scales:{y:{beginAtZero:true},x:{grid:{display:false}}}}});
+}
+
+function initLiveMap(){
+  try{
+    state._liveMapInit=true;
+    const map=L.map('liveMap').setView([-33.87,151.21],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+    const positions=[[-33.87,151.20],[-33.865,151.215],[-33.875,151.205],[-33.868,151.208],[-33.872,151.213],[-33.863,151.218]];
+    positions.forEach((p,i)=>{
+      const colors=['#10B981','#F59E0B','#10B981','#3B82F6','#10B981','#10B981'];
+      const circle=L.circleMarker(p,{radius:10,fillColor:colors[i],color:'#fff',weight:2,fillOpacity:1}).addTo(map);
+    });
+  }catch(e){}
+}
+function initHistoryMap(){
+  try{
+    state._histMapInit=true;
+    const map=L.map('historyMap').setView([-33.868,151.207],14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+    const pts=[[-33.8688,151.2093],[-33.8675,151.2110],[-33.8662,151.2128],[-33.8650,151.2150]];
+    L.polyline(pts,{color:'#6B7280',weight:3,dashArray:'6,4'}).addTo(map);
+    const dotColors=['#10B981','#0D9488','#0D9488','#EF4444'];
+    pts.forEach((p,i)=>L.circleMarker(p,{radius:8,fillColor:dotColors[i],color:'#fff',weight:2,fillOpacity:1}).addTo(map));
+  }catch(e){}
+}
+
+function togglePass(id){
+  const el=document.getElementById(id);
+  if(el)el.type=el.type==='password'?'text':'password';
+}
+
+// ==================== AI ASSISTANT ====================
+var aiOpen=false, aiMsgs=[], aiLoading=false;
+
+function aiHTML(){
+  var fab='<button class="ai-fab" onclick="aiToggle()" title="AI Assistant"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>';
+  if(!aiOpen) return fab;
+  var msgHTML='';
+  if(aiMsgs.length===0){
+    msgHTML='<div class="ai-m bot">Hi! I am your Teamora assistant. Ask me anything about workforce, clients, timesheets, billing, or operations.</div>';
+  } else {
+    for(var i=0;i<aiMsgs.length;i++){
+      var m=aiMsgs[i];
+      var txt=m.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      msgHTML+='<div class="ai-m '+m.role+'">'+txt+'</div>';
+    }
+  }
+  var panel='<div class="ai-panel">';
+  panel+='<div class="ai-ph"><div class="ai-ph-title"><span class="ai-dot"></span>Teamora AI</div>';
+  panel+='<button onclick="aiToggle()" style="background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:20px;line-height:1">&times;</button></div>';
+  panel+='<div class="ai-msgs" id="aiMsgBox">'+msgHTML+'</div>';
+  panel+='<div class="ai-ir">';
+  panel+='<input class="ai-inp" id="aiInp" placeholder="Ask anything..." onkeydown="if(event.keyCode===13){aiSend();}">';
+  panel+='<button class="ai-sb" onclick="aiSend()" id="aiSBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>';
+  panel+='</div></div>';
+  return fab+panel;
+}
+async function aiSend(){
+  var inp=document.getElementById('aiInp');
+  if(!inp||!inp.value.trim()||aiLoading) return;
+  var txt=inp.value.trim();
+  inp.value='';
+  aiMsgs.push({role:'user',text:txt});
+  aiMsgs.push({role:'bot',text:'...'});
+  aiLoading=true;
+  render();
+  setTimeout(function(){var el=document.getElementById('aiMsgBox');if(el)el.scrollTop=el.scrollHeight;},60);
+  var msgs=[];
+  for(var i=0;i<aiMsgs.length-1;i++){
+    msgs.push({role:aiMsgs[i].role==='user'?'user':'assistant',content:aiMsgs[i].text});
+  }
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        system:'You are a helpful assistant in Teamora, a workforce management platform for NDIS, aged care, cleaning, security and hospitality. Help managers with rostering, timesheets, billing, client management and compliance. Be concise.',
+        messages:msgs
+      })
+    });
+    var data=await res.json();
+    var reply=(data.content&&data.content[0]&&data.content[0].text)?data.content[0].text:'Sorry, could not get a response.';
+    aiMsgs[aiMsgs.length-1]={role:'bot',text:reply};
+  }catch(e){
+    aiMsgs[aiMsgs.length-1]={role:'bot',text:'Network error. Please try again.'};
+  }
+  aiLoading=false;
+  render();
+  setTimeout(function(){var el=document.getElementById('aiMsgBox');if(el)el.scrollTop=el.scrollHeight;},60);
+}
+
+// ==================== INIT ====================
+render();
+</script>
+</body>
+</html>
